@@ -1,0 +1,49 @@
+name: Сдача работы
+description: Отправка выполненной работы (СЗ 11–15, СРС 2) преподавателю
+title: "[Сдача] "
+labels: ["сдача"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Заполните поля. Фамилию не пишите — достаточно ID из списка группы. Скриншот окна программы перетащите в поле «Скриншот и файлы».
+  - type: input
+    id: student
+    attributes:
+      label: ID студента
+      description: Номер из списка группы (выдаёт преподаватель)
+    validations:
+      required: true
+  - type: input
+    id: group
+    attributes:
+      label: Группа
+    validations:
+      required: true
+  - type: input
+    id: work
+    attributes:
+      label: Работа
+      description: "Например: СЗ 12 — индивидуальное задание"
+    validations:
+      required: true
+  - type: input
+    id: variant
+    attributes:
+      label: Вариант
+  - type: textarea
+    id: code
+    attributes:
+      label: Код программы (.cpp)
+      render: cpp
+    validations:
+      required: true
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Скриншот и файлы
+      description: Перетащите сюда снимок окна программы; для СРС 2 — также отчёт (PDF или DOCX)
+  - type: textarea
+    id: answers
+    attributes:
+      label: Ответы на контрольные вопросы

@@ -49,7 +49,8 @@
       throw new Error("Администратор ещё не подключил панель к GitHub.");
     }).catch(function (err) {
       if (err.message === "bad") fail("Неверный логин или пароль.");
-      else fail(err.status === 401 ? "Доступ к GitHub отозван: администратору нужно подключить панель заново." : err.message);
+      else if (err.status === 401 && me && me.role === "admin") { msg.textContent = ""; login.hidden = true; askToken(); }   // срок токена истёк — подключить заново
+      else fail(err.status === 401 ? "Срок доступа к GitHub истёк: администратору нужно войти и подключить панель заново." : err.message);
     });
   });
   function connect(token) {

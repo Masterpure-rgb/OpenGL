@@ -2,5 +2,5 @@
 window.OGL_CONFIG = {
   repo: "Masterpure-rgb/OpenGL",
   site: "https://masterpure-rgb.github.io/OpenGL/",
-  v: 4
+  v: 5
 };

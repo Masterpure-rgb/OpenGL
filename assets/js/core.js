@@ -5,30 +5,30 @@
   var BASE = src.replace(/assets\/js\/core\.js.*$/, "");
 
   var TOPICS = [
-    { n: 11, lec: "Основы Open Graphics Library (OpenGL)", prac: "Рисование и преобразование геометрических объектов в OpenGL", short: "Основы OpenGL" },
-    { n: 12, lec: "Преобразования объектов, материалы и освещение в OpenGL", prac: "Модельно-видовые преобразования. Проекции. Описание источников света", short: "Преобразования и освещение" },
-    { n: 13, lec: "Текстурирование и операции с пикселами в OpenGL", prac: "Наложение текстуры на объекты. Управление растеризацией", short: "Текстуры и пиксели" },
-    { n: 14, lec: "Приемы работы с OpenGL", prac: "Устранение ступенчатости. Построение теней. Зеркальные отражения", short: "Сглаживание, тени, зеркала" },
-    { n: 15, lec: "Оптимизация программ с использованием OpenGL", prac: "Организация приложения. Оптимизация вызовов OpenGL", short: "Оптимизация" }
+    { n: 11, k: 1, lec: "Основы Open Graphics Library (OpenGL)", prac: "Рисование и преобразование геометрических объектов в OpenGL", short: "Основы OpenGL" },
+    { n: 12, k: 2, lec: "Преобразования объектов, материалы и освещение в OpenGL", prac: "Модельно-видовые преобразования. Проекции. Описание источников света", short: "Преобразования и освещение" },
+    { n: 13, k: 3, lec: "Текстурирование и операции с пикселами в OpenGL", prac: "Наложение текстуры на объекты. Управление растеризацией", short: "Текстуры и пиксели" },
+    { n: 14, k: 4, lec: "Приемы работы с OpenGL", prac: "Устранение ступенчатости. Построение теней. Зеркальные отражения", short: "Сглаживание, тени, зеркала" },
+    { n: 15, k: 5, lec: "Оптимизация программ с использованием OpenGL", prac: "Организация приложения. Оптимизация вызовов OpenGL", short: "Оптимизация" }
   ];
   var SRSP = [
-    { n: 5, title: "Контрольная работа по теме СРС 2", after: 11 },
-    { n: 6, title: "Прием и защита СРС 2", after: 14 },
-    { n: 7, title: "Консультация перед проведением итогового экзамена", after: 15 }
+    { n: 1, title: "Контрольная работа по теме СРС 1", after: 11 },
+    { n: 2, title: "Прием и защита СРС 1", after: 14 },
+    { n: 3, title: "Консультация перед проведением итогового экзамена", after: 15 }
   ];
   // занятия модуля в порядке расписания (для журнала посещаемости)
   var SESSIONS = [
-    { id: "L11", label: "Л 11" }, { id: "S11", label: "СЗ 11" }, { id: "P5", label: "СРСП 5" },
-    { id: "L12", label: "Л 12" }, { id: "S12", label: "СЗ 12" },
-    { id: "L13", label: "Л 13" }, { id: "S13", label: "СЗ 13" },
-    { id: "L14", label: "Л 14" }, { id: "S14", label: "СЗ 14" }, { id: "P6", label: "СРСП 6" },
-    { id: "L15", label: "Л 15" }, { id: "S15", label: "СЗ 15" }, { id: "P7", label: "СРСП 7" }
+    { id: "L11", label: "Л 1" }, { id: "S11", label: "ЛР 1" }, { id: "P5", label: "СРСП 1" },
+    { id: "L12", label: "Л 2" }, { id: "S12", label: "ЛР 2" },
+    { id: "L13", label: "Л 3" }, { id: "S13", label: "ЛР 3" },
+    { id: "L14", label: "Л 4" }, { id: "S14", label: "ЛР 4" }, { id: "P6", label: "СРСП 2" },
+    { id: "L15", label: "Л 5" }, { id: "S15", label: "ЛР 5" }, { id: "P7", label: "СРСП 3" }
   ];
   // работы, которые сдаются через GitHub
   var WORKS = [
-    { id: "SZ11", label: "СЗ 11 — индивидуальное задание" }, { id: "SZ12", label: "СЗ 12 — индивидуальное задание" },
-    { id: "SZ13", label: "СЗ 13 — индивидуальное задание" }, { id: "SZ14", label: "СЗ 14 — индивидуальное задание" },
-    { id: "SZ15", label: "СЗ 15 — индивидуальное задание" }, { id: "SRS2", label: "СРС 2 — проект «Интерактивная 3D-сцена»" }
+    { id: "SZ11", label: "ЛР 1 — индивидуальное задание" }, { id: "SZ12", label: "ЛР 2 — индивидуальное задание" },
+    { id: "SZ13", label: "ЛР 3 — индивидуальное задание" }, { id: "SZ14", label: "ЛР 4 — индивидуальное задание" },
+    { id: "SZ15", label: "ЛР 5 — индивидуальное задание" }, { id: "SRS2", label: "СРС 1 — проект «Интерактивная 3D-сцена»" }
   ];
   var CFG = global.OGL_CONFIG || {};
   var REPO = CFG.repo || "Masterpure-rgb/OpenGL";
@@ -56,6 +56,8 @@
     del: function (k) { try { localStorage.removeItem("ogl:" + k); } catch (e) {} }
   };
   function topic(n) { return TOPICS.filter(function (t) { return t.n === +n; })[0]; }
+  function kk(n) { var t = topic(n); return t ? t.k : n; }               // номер работы для показа (1–5)
+  function tpath(kind, n) { return link(kind + "/" + kk(n) + "/"); }       // адрес страницы работы
   function link(path) { return BASE + path; }
   function fetchJSON(path) { return fetch(BASE + path, { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -95,21 +97,21 @@
   }
   function footer() {
     var f = el("footer", { class: "foot" },
-      el("p", null, "Ф.М. Нуралиев, С.Н. Ибодуллаев. Компьютерная графика. Модуль 2. Графическая библиотека OpenGL: методические указания. Ташкентский университет информационных технологий имени Мухаммада аль-Хорезми, 2026."),
-      el("p", null, el("a", { href: link("metodichka/OpenGL_metodicheskie_ukazaniya_2026.docx"), download: "" }, "Методичка (Word)"), el("a", { href: link("help/") }, "Как сдать работу"), el("a", { href: link("admin/") }, "Преподавателю"), el("a", { href: "https://github.com/" + REPO, rel: "noopener" }, "Репозиторий на GitHub")));
+      el("p", null, "Ф.М. Нуралиев, С.Н. Ибодуллаев. Компьютерная графика. Модуль 2. Графическая библиотека OpenGL: методические указания к лабораторным работам. Ташкентский университет информационных технологий имени Мухаммада аль-Хорезми, 2026."),
+      el("p", null, el("a", { href: link("metodichka/OpenGL_laboratornye_raboty_2026.docx"), download: "" }, "Методичка (Word)"), el("a", { href: link("help/") }, "Как сдать работу"), el("a", { href: link("admin/") }, "Преподавателю"), el("a", { href: "https://github.com/" + REPO, rel: "noopener" }, "Репозиторий на GitHub")));
     document.body.appendChild(f);
   }
   // три ресурса темы
   function trio(n, active) {
     var t = topic(n);
     function a(kind, href, label, sub) { return el("a", { href: href, class: "tri" + (active === kind ? " on" : "") }, el("b", null, label), el("span", null, sub)); }
-    return el("nav", { class: "trio", "aria-label": "Материалы темы " + n },
-      a("e", link("e/" + n + "/"), "Объяснение", "≈2 минуты, аудио"),
-      a("l", link("l/" + n + "/"), "Лаборатория", "код и окно OpenGL"),
-      a("z", link("z/" + n + "/"), "Задания", "вопросы, варианты, сдача"));
+    return el("nav", { class: "trio", "aria-label": "Материалы работы " + kk(n) },
+      a("e", tpath("e", n), "Объяснение", "≈2 минуты, аудио"),
+      a("l", tpath("l", n), "Лаборатория", "код и окно OpenGL"),
+      a("z", tpath("z", n), "Задания", "вопросы, варианты, сдача"));
   }
 
   global.OGL = { BASE: BASE, TOPICS: TOPICS, SRSP: SRSP, SESSIONS: SESSIONS, WORKS: WORKS, REPO: REPO, CFG: CFG,
-    el: el, rich: rich, $: $, $$: $$, store: store, topic: topic, link: link, fetchJSON: fetchJSON, esc: esc, toast: toast, loadScript: loadScript,
+    el: el, rich: rich, $: $, $$: $$, store: store, topic: topic, k: kk, tpath: tpath, link: link, fetchJSON: fetchJSON, esc: esc, toast: toast, loadScript: loadScript,
     header: header, footer: footer, trio: trio };
 })(window);

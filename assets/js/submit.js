@@ -48,7 +48,7 @@
       form.appendChild(el("ol", { class: "after" },
         el("li", null, "В открывшейся вкладке войдите в GitHub (или зарегистрируйтесь)."),
         url !== withCode ? el("li", null, el("b", null, copied ? "Код скопирован в буфер обмена: " : "Код длинный — скопируйте его вручную: "), "щёлкните в поле «Код программы (.cpp)» и вставьте (Ctrl+V).") : el("li", null, "Поля уже заполнены — проверьте их."),
-        el("li", null, "Перетащите в поле «Скриншот и файлы» снимок окна программы (кнопка «Скриншот» в редакторе)", W.id === "SRS2" ? " и отчёт по СРС 2." : "."),
+        el("li", null, "Перетащите в поле «Скриншот и файлы» снимок окна программы (кнопка «Скриншот» в редакторе)", W.id === "SRS2" ? " и отчёт по СРС 1." : "."),
         el("li", null, "Нажмите «Create». Статус работы появится в разделе «Мой кабинет» после проверки.")));
       if (url !== withCode && !copied) form.appendChild(el("button", { class: "btn small", type: "button", onclick: function () { try { navigator.clipboard.writeText(code.value); O.toast("Код скопирован", "good"); } catch (er) {} } }, "Скопировать код"));
       form.appendChild(el("div", { class: "dlg-act" }, el("a", { class: "btn ghost", href: url, target: "_blank", rel: "noopener" }, "Открыть GitHub ещё раз"), el("button", { class: "btn", type: "button", onclick: function () { dlg.close(); } }, "Готово")));

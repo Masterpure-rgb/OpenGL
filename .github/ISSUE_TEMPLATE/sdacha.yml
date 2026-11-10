@@ -1,5 +1,5 @@
 name: Сдача работы
-description: Отправка выполненной работы (СЗ 11–15, СРС 2) преподавателю
+description: Отправка выполненной работы (ЛР 1–5, СРС 1) преподавателю
 title: "[Сдача] "
 labels: ["сдача"]
 body:
@@ -24,7 +24,7 @@ body:
     id: work
     attributes:
       label: Работа
-      description: "Например: СЗ 12 — индивидуальное задание"
+      description: "Например: ЛР 2 — индивидуальное задание"
     validations:
       required: true
   - type: input
@@ -42,7 +42,7 @@ body:
     id: screenshot
     attributes:
       label: Скриншот и файлы
-      description: Перетащите сюда снимок окна программы; для СРС 2 — также отчёт (PDF или DOCX)
+      description: Перетащите сюда снимок окна программы; для СРС 1 — также отчёт (PDF или DOCX)
   - type: textarea
     id: answers
     attributes:

@@ -3,9 +3,9 @@
   "use strict";
   var O = window.OGL, el = O.el;
   var n = +document.body.getAttribute("data-topic"), T = O.topic(n);
-  O.header("home", [{ text: "Темы", href: O.link("") }, { text: "Тема " + n, href: O.link("#t" + n) }, { text: "Объяснение" }]);
+  O.header("home", [{ text: "Темы", href: O.link("") }, { text: "Тема " + O.k(n), href: O.link("#t" + n) }, { text: "Объяснение" }]);
   var main = el("main", { class: "wrap doc" }); document.body.appendChild(main);
-  main.appendChild(el("div", { class: "pagehead flat" }, el("p", { class: "kicker" }, "Л " + n + ". Объяснение темы"), el("h1", null, T.lec), O.trio(n, "e")));
+  main.appendChild(el("div", { class: "pagehead flat" }, el("p", { class: "kicker" }, "Тема " + O.k(n) + ". Объяснение"), el("h1", null, T.lec), O.trio(n, "e")));
   function mmss(s) { s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
   O.fetchJSON("data/audio/" + n + ".json").then(render, function () { main.appendChild(el("p", { class: "note" }, "Аудиообъяснение этой темы готовится.")); O.footer(); });
   function render(D) {
@@ -19,7 +19,7 @@
     var tr = el("section", { class: "transcript" }, el("h2", null, "Текст объяснения"));
     var ps = D.paragraphs.map(function (p) { var e = el("p", { tabindex: "0" }, p.text); e.addEventListener("click", function () { a.currentTime = p.start + 0.01; a.play(); }); e.addEventListener("keydown", function (ev) { if (ev.key === "Enter") e.click(); }); tr.appendChild(e); return e; });
     main.appendChild(tr);
-    main.appendChild(el("section", { class: "next" }, el("p", null, "Дальше — практика: пример и задания с проверкой прямо в браузере."), el("a", { class: "btn run", href: O.link("l/" + n + "/") }, "Открыть лабораторную")));
+    main.appendChild(el("section", { class: "next" }, el("p", null, "Дальше — практика: пример и задания с проверкой прямо в браузере."), el("a", { class: "btn run", href: O.tpath("l", n) }, "Открыть лабораторную")));
     btn.addEventListener("click", function () { if (a.paused) a.play(); else a.pause(); });
     a.addEventListener("play", function () { btn.classList.add("on"); btn.setAttribute("aria-label", "Пауза"); });
     a.addEventListener("pause", function () { btn.classList.remove("on"); btn.setAttribute("aria-label", "Слушать"); });

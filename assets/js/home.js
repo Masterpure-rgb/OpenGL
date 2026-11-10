@@ -2,7 +2,7 @@
 (function () {
   "use strict";
   var O = window.OGL, el = O.el, K = GL1.K;
-  var DOC = "metodichka/OpenGL_metodicheskie_ukazaniya_2026.docx";
+  var DOC = "metodichka/OpenGL_laboratornye_raboty_2026.docx";
   O.header("home");
   var DEMO = [
     "#include <GL/glut.h>",
@@ -74,8 +74,8 @@
     el("div", { class: "hero-t" },
       el("p", { class: "kicker" }, "Ташкентский университет информационных технологий имени Мухаммада аль-Хорезми"),
       el("h1", null, "Компьютерная графика", el("span", null, "Модуль 2. Графическая библиотека OpenGL")),
-      el("p", { class: "lead" }, "Методические указания к лекциям, практическим занятиям и СРСП. Каждая тема — короткое объяснение, лаборатория с кодом на C++, который работает прямо в браузере, и индивидуальные задания со сдачей через GitHub."),
-      el("div", { class: "cta" }, el("a", { class: "btn run", href: O.link("l/11/") }, "Начать с темы 11"), el("a", { class: "btn ghost", href: O.link("sandbox/") }, "Открыть песочницу"),
+      el("p", { class: "lead" }, "Методические указания к лабораторным работам и СРСП. Каждая работа — короткое объяснение темы, лаборатория с кодом на C++, который работает прямо в браузере, и индивидуальные задания со сдачей через GitHub."),
+      el("div", { class: "cta" }, el("a", { class: "btn run", href: O.tpath("l", 11) }, "Начать с работы 1"), el("a", { class: "btn ghost", href: O.link("sandbox/") }, "Открыть песочницу"),
         el("a", { class: "btn ghost doc-dl", href: O.link(DOC), download: "" }, "Методичка (Word)")),
       el("p", { class: "muted small" }, "В окне — работающая программа на OpenGL 1.x и GLUT. Фишки под окном обновляются в каждом кадре и показывают, какие возможности OpenGL сейчас включены.")),
     el("figure", { class: "hero-w" },
@@ -102,21 +102,21 @@
   var list = el("section", { class: "topics", id: "temy", "aria-label": "Темы модуля 2" }, el("h2", null, "Темы модуля"));
   function srspRow(s) {
     return el("article", { class: "trow srsp", id: "srsp" + s.n }, el("div", { class: "tn" }, el("span", null, "СРСП"), String(s.n)),
-      el("div", { class: "tt" }, el("b", null, s.title), el("span", null, s.n === 5 ? "Темы 11–13, требования к проекту СРС 2" : s.n === 6 ? "Демонстрация проекта, разбор кода, вопросы" : "Экзаменационные вопросы и типовые задачи модуля")),
+      el("div", { class: "tt" }, el("b", null, s.title), el("span", null, s.n === 1 ? "Темы 1–3, требования к проекту СРС 1" : s.n === 2 ? "Демонстрация проекта, разбор кода, вопросы" : "Экзаменационные вопросы и типовые задачи модуля")),
       el("div", { class: "tl" }, el("a", { class: "tri", href: O.link("srsp/#srsp" + s.n) }, el("b", null, "Материалы"))));
   }
   O.TOPICS.forEach(function (t) {
     var done = (O.store.get("lab" + t.n + ":done", []) || []).length;
     list.appendChild(el("article", { class: "trow", id: "t" + t.n },
-      el("div", { class: "tn" }, el("span", null, "Тема"), String(t.n)),
+      el("div", { class: "tn" }, el("span", null, "Тема"), String(t.k)),
       el("div", { class: "tt" },
-        el("p", null, el("span", { class: "lbl" }, "Лекция " + t.n), t.lec),
-        el("p", null, el("span", { class: "lbl" }, "Практика " + t.n), t.prac),
+        el("p", null, el("span", { class: "lbl" }, "Лекция " + t.k), t.lec),
+        el("p", null, el("span", { class: "lbl" }, "ЛР " + t.k), t.prac),
         done ? el("p", { class: "done" }, "Шагов лаборатории выполнено: " + done) : null),
       el("div", { class: "tl" },
-        el("a", { class: "tri", href: O.link("e/" + t.n + "/") }, el("b", null, "Объяснение"), el("span", null, "аудио")),
-        el("a", { class: "tri", href: O.link("l/" + t.n + "/") }, el("b", null, "Лаборатория"), el("span", null, "код и окно")),
-        el("a", { class: "tri", href: O.link("z/" + t.n + "/") }, el("b", null, "Задания"), el("span", null, "варианты, сдача")))));
+        el("a", { class: "tri", href: O.tpath("e", t.n) }, el("b", null, "Объяснение"), el("span", null, "аудио")),
+        el("a", { class: "tri", href: O.tpath("l", t.n) }, el("b", null, "Лаборатория"), el("span", null, "код и окно")),
+        el("a", { class: "tri", href: O.tpath("z", t.n) }, el("b", null, "Задания"), el("span", null, "варианты, сдача")))));
     O.SRSP.forEach(function (s) { if (s.after === t.n) list.appendChild(srspRow(s)); });
   });
   main.appendChild(list);

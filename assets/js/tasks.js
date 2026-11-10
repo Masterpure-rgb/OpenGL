@@ -3,9 +3,9 @@
   "use strict";
   var O = window.OGL, el = O.el;
   var n = +document.body.getAttribute("data-topic"), T = O.topic(n);
-  O.header("home", [{ text: "Темы", href: O.link("") }, { text: "Тема " + n, href: O.link("#t" + n) }, { text: "Задания" }]);
+  O.header("home", [{ text: "Темы", href: O.link("") }, { text: "Тема " + O.k(n), href: O.link("#t" + n) }, { text: "Задания" }]);
   var main = el("main", { class: "wrap doc" }); document.body.appendChild(main);
-  main.appendChild(el("div", { class: "pagehead flat" }, el("p", { class: "kicker" }, "СЗ " + n + ". Задания и сдача"), el("h1", null, T.prac), O.trio(n, "z")));
+  main.appendChild(el("div", { class: "pagehead flat" }, el("p", { class: "kicker" }, "ЛР " + O.k(n) + ". Задания и сдача"), el("h1", null, T.prac), O.trio(n, "z")));
   O.fetchJSON("data/topics/" + n + ".json").then(render, function () { main.appendChild(el("p", { class: "note" }, "Материалы темы ещё готовятся.")); O.footer(); });
 
   function qa(list, open) {
@@ -19,7 +19,7 @@
     main.appendChild(el("section", { class: "blk" },
       el("h2", null, "Порядок работы"),
       el("ol", { class: "seq" },
-        el("li", null, el("b", null, "Пройдите лабораторную. "), "Пример и задания по шагам с автоматической проверкой. ", el("a", { href: O.link("l/" + n + "/") }, labDone ? "Продолжить (выполнено шагов: " + labDone + ")" : "Открыть лабораторную")),
+        el("li", null, el("b", null, "Пройдите лабораторную. "), "Пример и задания по шагам с автоматической проверкой. ", el("a", { href: O.tpath("l", n) }, labDone ? "Продолжить (выполнено шагов: " + labDone + ")" : "Открыть лабораторную")),
         el("li", null, el("b", null, "Выполните индивидуальное задание своего варианта. "), "Номер варианта назначает преподаватель. Работайте в песочнице или в Visual Studio — код один и тот же."),
         el("li", null, el("b", null, "Сдайте работу через GitHub. "), "Кнопка ниже заполнит форму сдачи; останется приложить скриншот. ", el("a", { href: O.link("help/") }, "Подробнее о сдаче")),
         el("li", null, el("b", null, "Подготовьте ответы на контрольные вопросы "), "— преподаватель задаёт их при приёме работы."))));
@@ -49,7 +49,7 @@
       el("button", { class: "btn run", type: "button", onclick: function () { submit(sel.value); } }, "Сдать работу")));
     if (P.results && P.results.length) main.appendChild(el("section", { class: "blk" }, el("h2", null, "После занятия вы умеете"), el("ul", { class: "ticks" }, P.results.map(function (d) { return el("li", null, O.rich(d)); }))));
     main.appendChild(el("section", { class: "blk" }, el("h2", null, "Контрольные вопросы к практическому занятию"), el("p", { class: "muted small" }, "Сначала ответьте сами, затем раскройте ответ."), qa(P.questions)));
-    if (L && L.selfcheck) main.appendChild(el("section", { class: "blk" }, el("h2", null, "Вопросы для самоконтроля к лекции " + n), qa(L.selfcheck)));
+    if (L && L.selfcheck) main.appendChild(el("section", { class: "blk" }, el("h2", null, "Вопросы для самоконтроля по теме " + O.k(n)), qa(L.selfcheck)));
     O.footer();
   }
   function submit(v) {

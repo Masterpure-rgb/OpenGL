@@ -3,11 +3,11 @@
   "use strict";
   var O = window.OGL, el = O.el;
   var n = +document.body.getAttribute("data-topic"), T = O.topic(n) || { n: n, prac: "Пример формата лабораторной" };
-  O.header("home", [{ text: "Темы", href: O.link("") }, { text: "Тема " + n, href: O.link("#t" + n) }, { text: "Лаборатория" }]);
+  O.header("home", [{ text: "Темы", href: O.link("") }, { text: "Тема " + O.k(n), href: O.link("#t" + n) }, { text: "Лаборатория" }]);
   var root = el("main", { class: "labpage" });
   document.body.appendChild(root);
   root.appendChild(el("div", { class: "pagehead" },
-    el("p", { class: "kicker" }, "СЗ " + n + ". Практическое занятие"),
+    el("p", { class: "kicker" }, "ЛР " + O.k(n) + ". Лабораторная работа"),
     el("h1", null, T.prac), O.trio(n, "l")));
 
   O.loadScript("assets/js/labs/lab" + n + ".js?v=" + (O.CFG.v || 1)).then(start, function () {
@@ -98,7 +98,7 @@
       var nav = el("div", { class: "task-nav" },
         i > 0 ? el("button", { class: "btn ghost", type: "button", onclick: function () { go(i - 1); } }, "Предыдущий шаг") : null,
         i < steps.length - 1 ? el("button", { class: "btn ghost", type: "button", onclick: function () { go(i + 1); } }, s.kind === "example" ? "К первому заданию" : "Следующий шаг") :
-          el("a", { class: "btn", href: O.link("z/" + n + "/") }, "К индивидуальному заданию"));
+          el("a", { class: "btn", href: O.tpath("z", n) }, "К индивидуальному заданию"));
       taskBox.appendChild(nav);
       ide.opts.fileName = "sz" + n + "_" + s.id;
       ide.editor.set(O.store.get(key + ":" + s.id, null) || s.starter || s.code);
@@ -119,7 +119,7 @@
         if (r.ok) {
           done.add(s.id); O.store.set(key + ":done", Array.from(done)); renderList();
           if (cur < steps.length - 1) result.appendChild(el("button", { class: "btn small", type: "button", onclick: function () { go(cur + 1); } }, "Следующий шаг"));
-          else result.appendChild(el("a", { class: "btn small", href: O.link("z/" + n + "/") }, "К индивидуальному заданию"));
+          else result.appendChild(el("a", { class: "btn small", href: O.tpath("z", n) }, "К индивидуальному заданию"));
         }
         if (window.matchMedia("(max-width: 900px)").matches) setTab("task");
       });

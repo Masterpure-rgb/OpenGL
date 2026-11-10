@@ -16,7 +16,7 @@
       el("li", null, "Выполните задание в лаборатории, в песочнице или в Visual Studio."),
       el("li", null, "Нажмите «Сдать работу» (на странице «Задания» темы или в песочнице). Укажите ID из списка группы, группу и вариант. Фамилию не пишите: репозиторий открытый, по ID работу узнаёт только преподаватель."),
       el("li", null, "Откроется страница GitHub «New issue» с заполненными полями. Если код длинный, он копируется в буфер обмена — вставьте его в поле «Код программы (.cpp)»."),
-      el("li", null, "Сохраните скриншот окна (кнопка «Скриншот» в редакторе) и перетащите его в поле «Скриншот и файлы». Для СРС 2 туда же перетащите отчёт (PDF или DOCX)."),
+      el("li", null, "Сохраните скриншот окна (кнопка «Скриншот» в редакторе) и перетащите его в поле «Скриншот и файлы». Для СРС 1 туда же перетащите отчёт (PDF или DOCX)."),
       el("li", null, "Нажмите «Create». Работа появилась в списке ", el("a", { href: repo + "/issues", target: "_blank", rel: "noopener" }, "Issues"), " репозитория курса."))));
   main.appendChild(el("section", { class: "blk" }, el("h2", null, "3. Проверка и статусы"),
     el("dl", { class: "defs" },
@@ -29,7 +29,7 @@
     el("ol", { class: "num" },
       el("li", null, "Установите Visual Studio 2022 Community с рабочей нагрузкой «Разработка классических приложений на C++»."),
       el("li", null, "Создайте проект «Консольное приложение» (C++), платформа x64, и замените содержимое файла .cpp кодом из лаборатории или песочницы."),
-      el("li", null, "Установите freeglut и GLEW через менеджер пакетов vcpkg: ", el("code", null, "vcpkg install freeglut:x64-windows glew:x64-windows"), ", затем ", el("code", null, "vcpkg integrate install"), ". GLEW нужен для функций и констант OpenGL 1.2+ (GL_CLAMP_TO_EDGE, glWindowPos2i, VBO): программы тем 12–15 начинаются строкой ", el("code", null, "#include <GL/glew.h>"), " и вызывают ", el("code", null, "glewInit()"), " после glutCreateWindow."),
+      el("li", null, "Установите freeglut и GLEW через менеджер пакетов vcpkg: ", el("code", null, "vcpkg install freeglut:x64-windows glew:x64-windows"), ", затем ", el("code", null, "vcpkg integrate install"), ". GLEW нужен для функций и констант OpenGL 1.2+ (GL_CLAMP_TO_EDGE, glWindowPos2i, VBO): программы лабораторных работ 2–5 начинаются строкой ", el("code", null, "#include <GL/glew.h>"), " и вызывают ", el("code", null, "glewInit()"), " после glutCreateWindow."),
       el("li", null, "Для загрузки изображений (stbi_load) скачайте один файл stb_image.h из репозитория nothings/stb, добавьте в проект и перед подключением напишите ", el("code", null, "#define STB_IMAGE_IMPLEMENTATION"), ". Файлы текстур песочницы положите в папку проекта (при запуске из Visual Studio программа ищет их там) или рядом с .exe: ", [].concat.apply([], ["brick", "wood", "checker", "marble", "crate", "grass", "stone", "water", "earth", "metal", "glass", "tiles"].map(function (t, i) { return [i ? ", " : "", el("a", { href: O.link("assets/tex/" + t + ".png"), download: t + ".png" }, t + ".png")]; })), "."),
       el("li", null, "Если в программе используется константа M_PI, первой строкой файла напишите ", el("code", null, "#define _USE_MATH_DEFINES"), " — без неё компилятор Visual C++ её не знает."),
       el("li", null, "Соберите и запустите (F5). Результат совпадает с окном в браузере."))));

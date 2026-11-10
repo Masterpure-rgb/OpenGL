@@ -6,7 +6,7 @@
   var qs = new URLSearchParams(location.search), t = qs.get("t"), v = qs.get("v");
   var key = t ? "sandbox:t" + t + ":v" + (v || "") : "sandbox:last";
   var main = el("main", { class: "sandpage" }); document.body.appendChild(main);
-  var head = el("div", { class: "pagehead" }, el("p", { class: "kicker" }, t ? "СЗ " + t + (v ? ". Вариант " + v : "") : "Песочница"), el("h1", null, t ? (O.topic(t) || {}).prac || "Индивидуальное задание" : "Свободная программа на OpenGL"));
+  var head = el("div", { class: "pagehead" }, el("p", { class: "kicker" }, t ? "ЛР " + O.k(t) + (v ? ". Вариант " + v : "") : "Песочница"), el("h1", null, t ? (O.topic(t) || {}).prac || "Индивидуальное задание" : "Свободная программа на OpenGL"));
   main.appendChild(head);
   var taskP = el("p", { class: "lead sand-task" });
   if (t) head.appendChild(taskP);
@@ -21,7 +21,7 @@
     "    glutCreateWindow(\"3D-сцена\");", "    glEnable(GL_DEPTH_TEST);", "    glEnable(GL_LIGHTING);", "    glEnable(GL_LIGHT0);", "    glutDisplayFunc(display);", "    glutReshapeFunc(reshape);", "    glutIdleFunc(idle);", "    glutMainLoop();", "    return 0;", "}", ""].join("\n");
   var ideHost = el("div", { class: "sand" });
   var tpl = el("select", { "aria-label": "Шаблон" }, el("option", { value: "" }, "Шаблон…"), el("option", { value: "2d" }, "Пустая 2D-программа"), el("option", { value: "3d" }, "3D-сцена с освещением"),
-    O.TOPICS.map(function (x) { return el("option", { value: "lab" + x.n }, "Пример темы " + x.n); }));
+    O.TOPICS.map(function (x) { return el("option", { value: "lab" + x.n }, "Пример ЛР " + x.k); }));
   var bar = el("div", { class: "sand-bar" }, tpl,
     el("button", { class: "btn run", type: "button", onclick: function () { Submit.open({ work: t ? "SZ" + t : "SRS2", variant: v || "", code: ide.editor.get() }); } }, "Сдать работу"));
   main.appendChild(el("div", { class: "sand-wrap" }, bar, ideHost));

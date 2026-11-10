@@ -4,7 +4,6 @@
   var O = window.OGL, el = O.el;
   O.header("help", [{ text: "Темы", href: O.link("") }, { text: "Как сдать работу" }]);
   var main = el("main", { class: "wrap doc" }); document.body.appendChild(main);
-  var repo = "https://github.com/" + O.REPO;
   main.appendChild(el("div", { class: "pagehead flat" }, el("p", { class: "kicker" }, "Справка"), el("h1", null, "Как сдать работу")));
   main.appendChild(el("section", { class: "blk" }, el("h2", null, "1. Аккаунт GitHub"),
     el("ol", { class: "num" },
@@ -17,7 +16,7 @@
       el("li", null, "Нажмите «Сдать работу» (на странице «Задания» темы или в песочнице). Укажите ID из списка группы, группу и вариант. Фамилию не пишите: репозиторий открытый, по ID работу узнаёт только преподаватель."),
       el("li", null, "Откроется страница GitHub «New issue» с заполненными полями. Если код длинный, он копируется в буфер обмена — вставьте его в поле «Код программы (.cpp)»."),
       el("li", null, "Сохраните скриншот окна (кнопка «Скриншот» в редакторе) и перетащите его в поле «Скриншот и файлы». Для СРС 1 туда же перетащите отчёт (PDF или DOCX)."),
-      el("li", null, "Нажмите «Create». Работа появилась в списке ", el("a", { href: repo + "/issues", target: "_blank", rel: "noopener" }, "Issues"), " репозитория курса."))));
+      el("li", null, "Нажмите «Create». Работа появилась в списке обращений (Issues) курса."))));
   main.appendChild(el("section", { class: "blk" }, el("h2", null, "3. Проверка и статусы"),
     el("dl", { class: "defs" },
       el("dt", null, "Отправлено"), el("dd", null, "Работа ждёт проверки."),

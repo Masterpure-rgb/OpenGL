@@ -98,7 +98,7 @@
   function footer() {
     var f = el("footer", { class: "foot" },
       el("p", null, "Ф.М. Нуралиев, С.Н. Ибодуллаев. Компьютерная графика. Модуль 2. Графическая библиотека OpenGL: методические указания к лабораторным работам. Ташкентский университет информационных технологий имени Мухаммада аль-Хорезми, 2026."),
-      el("p", null, el("a", { href: link("metodichka/OpenGL_laboratornye_raboty_2026.docx"), download: "" }, "Методичка (Word)"), el("a", { href: link("help/") }, "Как сдать работу"), el("a", { href: link("admin/") }, "Преподавателю"), el("a", { href: "https://github.com/" + REPO, rel: "noopener" }, "Репозиторий на GitHub")));
+      el("p", null, el("a", { href: link("metodichka/OpenGL_laboratornye_raboty_2026.docx"), download: "" }, "Методичка (Word)"), el("a", { href: link("help/") }, "Как сдать работу")));
     document.body.appendChild(f);
   }
   // три ресурса темы

@@ -11,39 +11,93 @@
   var SLABEL = {}; O.SESSIONS.forEach(function (s) { SLABEL[s.id] = s.label; });
   function workId(label) { var f = O.WORKS.filter(function (w) { return label && (label === w.label || label.indexOf(w.label.split(" — ")[0]) === 0); })[0]; return f ? f.id : ""; }
 
-  /* ---------------- вход ---------------- */
-  var tokIn = el("input", { type: "password", autocomplete: "off", value: O.store.get("tok", "") || "", placeholder: "github_pat_…" });
-  var remember = el("input", { type: "checkbox", checked: O.store.get("tok", "") ? true : null });
-  var passIn = el("input", { type: "password", autocomplete: "current-password", placeholder: "пароль журнала" });
+  /* ---------------- вход: логин и пароль ----------------
+     data/acc/<хеш логина>.json — учётная запись {login, name, role, K}, зашифрована паролем;
+     data/vault.json — токен GitHub, зашифрован общим ключом K; data/journal.json — журнал, ключ K. */
+  var me = null;
+  var ACC = {
+    file: function (login) { return C.sha("ogl-acc|" + String(login).trim().toLowerCase()).then(function (h) { return "data/acc/" + h.slice(0, 24) + ".json"; }); },
+    salt: function (login) { return "ogl-acc|" + String(login).trim().toLowerCase(); }
+  };
+  function newPassword() {
+    var A = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789", r = crypto.getRandomValues(new Uint8Array(12)), s = "";
+    for (var i = 0; i < 12; i++) s += (i && i % 4 === 0 ? "-" : "") + A[r[i] % A.length];
+    return s;
+  }
+  var loginIn = el("input", { autocomplete: "username", value: O.store.get("adm", "") || "", required: true });
+  var pwIn = el("input", { type: "password", autocomplete: "current-password", required: true });
   var msg = el("p", { class: "dlg-msg", role: "status" });
-  var login = el("form", { class: "login wide" },
-    el("p", null, "Работы студентов приходят как обращения (Issues) в репозиторий ", el("a", { href: "https://github.com/" + O.REPO, target: "_blank", rel: "noopener" }, O.REPO), ". Журнал (студенты, посещаемость, статусы) хранится там же в зашифрованном виде."),
-    el("label", { class: "fld" }, el("span", null, "Токен доступа GitHub"), tokIn,
-      el("small", null, "GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token. Repository access: Only select repositories → " + O.REPO + ". Permissions: Contents — Read and write, Issues — Read and write.")),
-    el("label", { class: "chk" }, remember, " Запомнить токен на этом компьютере"),
-    el("label", { class: "fld" }, el("span", null, "Пароль журнала"), passIn, el("small", null, "Им шифруется журнал. Без пароля данные восстановить нельзя — храните его надёжно.")),
-    el("button", { class: "btn run", type: "submit" }, "Открыть журнал"), msg);
+  var login = el("form", { class: "login" },
+    el("label", { class: "fld" }, el("span", null, "Логин"), loginIn),
+    el("label", { class: "fld" }, el("span", null, "Пароль"), pwIn),
+    el("button", { class: "btn run", type: "submit" }, "Войти"), msg);
   main.appendChild(login);
   var app = el("div", { hidden: true }); main.appendChild(app);
+  function fail(t) { msg.className = "dlg-msg bad"; msg.textContent = t; }
   login.addEventListener("submit", function (e) {
-    e.preventDefault(); msg.className = "dlg-msg"; msg.textContent = "Подключаюсь к GitHub…";
-    gh = new GHApi.GH(tokIn.value.trim(), O.REPO); pass = passIn.value;
-    if (!pass) { msg.textContent = "Введите пароль журнала."; msg.className = "dlg-msg bad"; return; }
-    gh.repoInfo().then(function (r) {
-      if (!r.permissions || !r.permissions.push) throw new Error("У токена нет права записи в репозиторий.");
-      if (remember.checked) O.store.set("tok", tokIn.value.trim()); else O.store.del("tok");
+    e.preventDefault(); msg.className = "dlg-msg"; msg.textContent = "Проверяю…";
+    var lg = loginIn.value.trim(), pw = pwIn.value;
+    ACC.file(lg).then(GHApi.readPublic).then(function (box) {
+      if (!box) throw new Error("bad");
+      return C.open(box, pw, ACC.salt(lg)).catch(function () { throw new Error("bad"); });
+    }).then(function (acc) {
+      me = acc; pass = acc.K; O.store.set("adm", lg); pwIn.value = "";
+      return GHApi.readPublic("data/vault.json").then(function (v) { return v ? C.open(v, pass).catch(function () { return null; }) : null; });
+    }).then(function (vault) {
+      if (vault && vault.token) return connect(vault.token);
+      if (me.role === "admin") { login.hidden = true; askToken(); return; }
+      throw new Error("Администратор ещё не подключил панель к GitHub.");
+    }).catch(function (err) {
+      if (err.message === "bad") fail("Неверный логин или пароль.");
+      else fail(err.status === 401 ? "Доступ к GitHub отозван: администратору нужно подключить панель заново." : err.message);
+    });
+  });
+  function connect(token) {
+    msg.className = "dlg-msg"; msg.textContent = "Подключаюсь к GitHub…";
+    gh = new GHApi.GH(token, O.REPO);
+    return gh.repoInfo().then(function (r) {
+      if (!r.permissions || !r.permissions.push) throw new Error("У токена GitHub нет права записи: администратору нужно подключить панель заново.");
       return gh.getFile("data/journal.json");
     }).then(function (f) {
       if (!f) {
-        if (!confirm("Журнал в репозитории ещё не создан. Создать новый журнал с этим паролем?")) throw new Error("Журнал не создан.");
-        J = { v: 1, students: [], sessions: {}, works: {}, files: [], updated: null }; sha = null; dirty = true; return;
+        J = { v: 1, students: [], sessions: {}, works: {}, files: [], accounts: [], updated: null }; sha = null; dirty = true;
+        return seedAccounts();
       }
       sha = f.sha;
-      return C.open(JSON.parse(f.text), pass).then(function (j) { J = j; }, function () { throw new Error("Неверный пароль журнала."); });
+      return C.open(JSON.parse(f.text), pass).then(function (j) { J = j; J.accounts = J.accounts || []; }, function () { throw new Error("Журнал не открывается этой учётной записью."); });
     }).then(function () {
+      if (!J.accounts.some(function (a) { return a.login === me.login; })) { J.accounts.push({ login: me.login, name: me.name || "", role: me.role }); dirty = true; }
       login.hidden = true; app.hidden = false; build();
-    }).catch(function (err) { msg.className = "dlg-msg bad"; msg.textContent = err.status === 401 ? "Токен не принят GitHub (истёк или введён с ошибкой)." : err.message; });
-  });
+    });
+  }
+  function seedAccounts() { // учётные записи, созданные при настройке сайта
+    J.accounts = [{ login: me.login, name: me.name || "", role: me.role }];
+    return ACC.file("nuraliyev").then(GHApi.readPublic).then(function (b) { if (b && me.login !== "nuraliyev") J.accounts.push({ login: "nuraliyev", name: "Ф.М. Нуралиев", role: "teacher" }); });
+  }
+  function askToken() { // один раз: администратор подключает панель к репозиторию
+    var tok = el("input", { type: "password", autocomplete: "off", placeholder: "github_pat_…", required: true });
+    var m2 = el("p", { class: "dlg-msg", role: "status" });
+    var f = el("form", { class: "login wide" },
+      el("h2", null, "Подключение к GitHub"),
+      el("p", null, "Выполняется один раз. Токен сохраняется в зашифрованном виде; после этого все преподаватели входят только по логину и паролю."),
+      el("label", { class: "fld" }, el("span", null, "Токен доступа GitHub"), tok,
+        el("small", null, "GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token. Repository access: Only select repositories → репозиторий курса. Permissions: Contents — Read and write, Issues — Read and write.")),
+      el("button", { class: "btn run", type: "submit" }, "Подключить"), m2);
+    main.insertBefore(f, app);
+    f.addEventListener("submit", function (e) {
+      e.preventDefault(); m2.className = "dlg-msg"; m2.textContent = "Проверяю токен…";
+      var g = new GHApi.GH(tok.value.trim(), O.REPO);
+      g.repoInfo().then(function (r) {
+        if (!r.permissions || !r.permissions.push) throw new Error("У токена нет права записи в репозиторий.");
+        return C.seal({ token: tok.value.trim(), at: new Date().toISOString() }, pass);
+      }).then(function (box) { return g.commit([{ path: "data/vault.json", text: JSON.stringify(box) }], "Панель преподавателя: подключение к GitHub"); })
+        .then(function () { f.remove(); return connect(tok.value.trim()); })
+        .catch(function (err) { m2.className = "dlg-msg bad"; m2.textContent = err.status === 401 ? "Токен не принят GitHub." : err.message; });
+    });
+  }
+  function sealAccount(acc, password) {
+    return Promise.all([ACC.file(acc.login), C.seal(acc, password, ACC.salt(acc.login))]).then(function (r) { return { path: r[0], text: JSON.stringify(r[1]) }; });
+  }
 
   /* ---------------- интерфейс ---------------- */
   var saveBtn, saveMsg, tabs, panes = {};
@@ -54,7 +108,11 @@
     tabs = el("div", { class: "atabs", role: "tablist" });
     var bar = el("div", { class: "abar" }, tabs, el("span", { class: "grow" }), saveMsg, saveBtn);
     app.appendChild(bar);
-    [["students", "Студенты"], ["att", "Посещаемость"], ["works", "Сданные работы"], ["sum", "Сводная ведомость"]].forEach(function (t, i) {
+    var T = [["students", "Студенты"], ["att", "Посещаемость"], ["works", "Сданные работы"], ["sum", "Сводная ведомость"]];
+    if (me.role === "admin") T.push(["acc", "Учётные записи"]);
+    bar.appendChild(el("span", { class: "muted small" }, (me.name || me.login) + (me.role === "admin" ? " (администратор)" : "")));
+    bar.appendChild(el("button", { class: "btn ghost", type: "button", onclick: function () { if (!dirty || confirm("Есть несохранённые изменения. Выйти без сохранения?")) { dirty = false; location.reload(); } } }, "Выйти"));
+    T.forEach(function (t, i) {
       var b = el("button", { type: "button", role: "tab", onclick: function () { show(t[0]); } }, t[1]); b.dataset.t = t[0]; tabs.appendChild(b);
       panes[t[0]] = el("section", { class: "apane", hidden: true }); app.appendChild(panes[t[0]]);
     });
@@ -64,7 +122,7 @@
   function show(t) {
     O.$$("button", tabs).forEach(function (b) { b.setAttribute("aria-selected", b.dataset.t === t ? "true" : "false"); });
     for (var k in panes) panes[k].hidden = k !== t;
-    ({ students: renderStudents, att: renderAtt, works: renderWorks, sum: renderSum })[t]();
+    ({ students: renderStudents, att: renderAtt, works: renderWorks, sum: renderSum, acc: renderAcc })[t]();
   }
   function groups() { var g = {}; J.students.forEach(function (s) { g[s.group || "—"] = 1; }); return Object.keys(g).sort(); }
   function byGroup(sel) { return J.students.filter(function (s) { return !sel || sel === "*" || (s.group || "—") === sel; }).sort(function (a, b) { return (a.group || "").localeCompare(b.group || "") || (a.name || "").localeCompare(b.name || "", "ru"); }); }
@@ -145,7 +203,7 @@
     var ssel = el("select", null, [["", "Все статусы"], ["sent", "Отправлено"], ["rework", "На доработку"], ["accepted", "Принято"]].map(function (x) { return el("option", { value: x[0], selected: x[0] === wFilter.status ? true : null }, x[1]); }));
     var gsel = el("select", null, el("option", { value: "*" }, "Все группы"), groups().map(function (g) { return el("option", { value: g, selected: g === wFilter.group ? true : null }, g); }));
     [wsel, ssel, gsel].forEach(function (s, i) { s.addEventListener("change", function () { wFilter[["work", "status", "group"][i]] = s.value; renderWorks(); }); });
-    P.appendChild(el("div", { class: "acard" }, el("div", { class: "row" }, load, wsel, ssel, gsel, el("span", { class: "grow" }), el("a", { href: "https://github.com/" + O.REPO + "/issues", target: "_blank", rel: "noopener" }, "Issues на GitHub"))));
+    P.appendChild(el("div", { class: "acard" }, el("div", { class: "row" }, load, wsel, ssel, gsel, el("span", { class: "grow" }))));
     if (!issues) { P.appendChild(el("p", { class: "muted" }, "Нажмите «Загрузить сдачи с GitHub».")); return; }
     var rows = issues.filter(function (x) {
       var w = J.works[x.number] || {}, st = w.status || "sent", s = student(x.f.student);
@@ -196,6 +254,50 @@
     dlg.showModal();
     var ide = new IDE(host, { code: x.f.code, fileName: "issue" + x.number, focusCanvas: false });
     ide.run();
+  }
+
+  /* учётные записи (только администратор) */
+  function renderAcc() {
+    var P = panes.acc; P.innerHTML = "";
+    function commitAcc(files, text) { return gh.commit(files, text); }
+    function showPw(login, pw) { alert("Логин: " + login + "\nПароль: " + pw + "\n\nЗапишите пароль: в системе он не хранится в открытом виде."); }
+    var tb = el("tbody");
+    J.accounts.forEach(function (a) {
+      tb.appendChild(el("tr", null, el("td", { class: "mono" }, a.login), el("td", null, a.name || ""), el("td", null, a.role === "admin" ? "администратор" : "преподаватель"),
+        el("td", { class: "acts" },
+          a.login === me.login ? el("button", { class: "linkbtn", type: "button", onclick: function () {
+            var p1 = prompt("Новый пароль (не короче 10 символов):", ""); if (!p1) return;
+            if (p1.length < 10) { O.toast("Пароль слишком короткий.", "bad"); return; }
+            if (prompt("Повторите новый пароль:", "") !== p1) { O.toast("Пароли не совпадают.", "bad"); return; }
+            sealAccount(me, p1).then(function (f) { return commitAcc([f], "Учётная запись: смена пароля"); }).then(function () { O.toast("Пароль изменён. Новый пароль действует через 1–2 минуты.", "good"); }, function (e) { O.toast("GitHub: " + e.message, "bad"); });
+          } }, "сменить мой пароль") : [
+            el("button", { class: "linkbtn", type: "button", onclick: function () {
+              if (!confirm("Выдать новый пароль для «" + a.login + "»? Старый перестанет действовать.")) return;
+              var pw = newPassword();
+              sealAccount({ login: a.login, name: a.name || "", role: a.role, K: pass }, pw).then(function (f) { return commitAcc([f], "Учётная запись: новый пароль"); }).then(function () { showPw(a.login, pw); }, function (e) { O.toast("GitHub: " + e.message, "bad"); });
+            } }, "новый пароль"), " ",
+            el("button", { class: "linkbtn danger", type: "button", onclick: function () {
+              if (!confirm("Удалить учётную запись «" + a.login + "»?")) return;
+              ACC.file(a.login).then(function (path) { return commitAcc([{ path: path, text: null }], "Учётная запись: удаление"); }).then(function () {
+                J.accounts = J.accounts.filter(function (x) { return x !== a; }); setDirty(true); renderAcc(); O.toast("Учётная запись удалена.", "good");
+              }, function (e) { O.toast("GitHub: " + e.message, "bad"); });
+            } }, "удалить")])));
+    });
+    var lg = el("input", { placeholder: "логин латиницей", autocomplete: "off" }), nm = el("input", { placeholder: "ФИО", autocomplete: "off" });
+    var role = el("select", null, el("option", { value: "teacher" }, "преподаватель"), el("option", { value: "admin" }, "администратор"));
+    P.appendChild(el("div", { class: "acard" }, el("h2", null, "Учётные записи"),
+      el("p", { class: "muted small" }, "Преподаватель видит студентов, посещаемость, сданные работы и ведомость. Администратор, кроме того, управляет учётными записями."),
+      el("div", { class: "tbl-wrap" }, el("table", { class: "tbl" }, el("thead", null, el("tr", null, ["Логин", "ФИО", "Роль", ""].map(function (h) { return el("th", null, h); }))), tb))));
+    P.appendChild(el("div", { class: "acard" }, el("h2", null, "Добавить учётную запись"),
+      el("div", { class: "row" }, lg, nm, role, el("button", { class: "btn", type: "button", onclick: function () {
+        var l = lg.value.trim().toLowerCase();
+        if (!/^[a-z0-9._-]{3,32}$/.test(l)) { O.toast("Логин: 3–32 латинские буквы, цифры, точка, дефис.", "bad"); return; }
+        if (J.accounts.some(function (x) { return x.login === l; })) { O.toast("Такой логин уже есть.", "bad"); return; }
+        var pw = newPassword(), a = { login: l, name: nm.value.trim(), role: role.value };
+        sealAccount({ login: a.login, name: a.name, role: a.role, K: pass }, pw).then(function (f) { return commitAcc([f], "Учётная запись: добавление"); }).then(function () {
+          J.accounts.push(a); setDirty(true); renderAcc(); showPw(l, pw);
+        }, function (e) { O.toast("GitHub: " + e.message, "bad"); });
+      } }, "Создать"))));
   }
 
   /* сводная ведомость */

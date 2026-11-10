@@ -1,6 +1,6 @@
 /* Лабораторная 15. Организация приложения. Оптимизация вызовов OpenGL. */
 (function () {
-  var INC = "#include <GL/glut.h>\n#include <cmath>\n#include <stdio.h>\n\n";
+  var INC = "#define _USE_MATH_DEFINES   // M_PI в Visual Studio\n#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows\n#include <GL/glut.h>\n#include <cmath>\n#include <stdio.h>\n\n";
 
   /* ---------- общая часть всех программ: состояние, текст, reshape, idle, FPS, main ---------- */
   function stateStruct(extra) {
@@ -60,6 +60,7 @@
       "    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);\n" +
       "    glutInitWindowSize(480, 360);\n" +
       "    glutCreateWindow(\"" + title + "\");\n" +
+      "    glewInit();\n" +
       "    init();\n" +
       "    glutDisplayFunc(display);\n" +
       "    glutReshapeFunc(reshape);\n" +

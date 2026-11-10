@@ -2,6 +2,7 @@
 (function () {
   "use strict";
   var O = window.OGL, el = O.el, K = GL1.K;
+  var DOC = "metodichka/OpenGL_metodicheskie_ukazaniya_2026.docx";
   O.header("home");
   var DEMO = [
     "#include <GL/glut.h>",
@@ -74,8 +75,9 @@
       el("p", { class: "kicker" }, "Ташкентский университет информационных технологий имени Мухаммада аль-Хорезми"),
       el("h1", null, "Компьютерная графика", el("span", null, "Модуль 2. Графическая библиотека OpenGL")),
       el("p", { class: "lead" }, "Методические указания к лекциям, практическим занятиям и СРСП. Каждая тема — короткое объяснение, лаборатория с кодом на C++, который работает прямо в браузере, и индивидуальные задания со сдачей через GitHub."),
-      el("div", { class: "cta" }, el("a", { class: "btn run", href: O.link("l/11/") }, "Начать с темы 11"), el("a", { class: "btn ghost", href: O.link("sandbox/") }, "Открыть песочницу")),
-      el("p", { class: "muted small" }, "Справа — работающая программа на OpenGL 1.x и GLUT. Окно и фишки состояния обновляются в каждом кадре: видно, какие возможности OpenGL включены прямо сейчас.")),
+      el("div", { class: "cta" }, el("a", { class: "btn run", href: O.link("l/11/") }, "Начать с темы 11"), el("a", { class: "btn ghost", href: O.link("sandbox/") }, "Открыть песочницу"),
+        el("a", { class: "btn ghost doc-dl", href: O.link(DOC), download: "" }, "Методичка (Word)")),
+      el("p", { class: "muted small" }, "В окне — работающая программа на OpenGL 1.x и GLUT. Фишки под окном обновляются в каждом кадре и показывают, какие возможности OpenGL сейчас включены.")),
     el("figure", { class: "hero-w" },
       el("div", { class: "win" }, el("div", { class: "win-bar" }, el("span", { class: "wt" }, "Чайник Юта"), fps), winHost),
       chips,

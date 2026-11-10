@@ -64,6 +64,14 @@
     document.body.appendChild(t); requestAnimationFrame(function () { t.classList.add("in"); });
     setTimeout(function () { t.classList.remove("in"); setTimeout(function () { t.remove(); }, 300); }, 3200);
   }
+  // текст с именами функций и констант OpenGL → узлы, где имена набраны моноширинным шрифтом
+  var IDENT = /((?:glut|glu|gl)[A-Z]\w*\*?|(?:GLUT|GLU|GL)_[A-Z0-9_]+\*?|stbi_\w+|`[^`]+`)/;
+  function rich(text) {
+    return String(text == null ? "" : text).split(IDENT).map(function (part, i) {
+      if (!(i % 2)) return part;
+      return el("code", null, part.charAt(0) === "`" ? part.slice(1, -1) : part);
+    }).filter(function (x) { return x !== ""; });
+  }
   function loadScript(path) { return new Promise(function (res, rej) { var s = document.createElement("script"); s.src = BASE + path; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
 
   // шапка и подвал
@@ -88,7 +96,7 @@
   function footer() {
     var f = el("footer", { class: "foot" },
       el("p", null, "Ф.М. Нуралиев, С.Н. Ибодуллаев. Компьютерная графика. Модуль 2. Графическая библиотека OpenGL: методические указания. Ташкентский университет информационных технологий имени Мухаммада аль-Хорезми, 2026."),
-      el("p", null, el("a", { href: link("help/") }, "Как сдать работу"), el("a", { href: link("admin/") }, "Преподавателю"), el("a", { href: "https://github.com/" + REPO, rel: "noopener" }, "Репозиторий на GitHub")));
+      el("p", null, el("a", { href: link("metodichka/OpenGL_metodicheskie_ukazaniya_2026.docx"), download: "" }, "Методичка (Word)"), el("a", { href: link("help/") }, "Как сдать работу"), el("a", { href: link("admin/") }, "Преподавателю"), el("a", { href: "https://github.com/" + REPO, rel: "noopener" }, "Репозиторий на GitHub")));
     document.body.appendChild(f);
   }
   // три ресурса темы
@@ -102,6 +110,6 @@
   }
 
   global.OGL = { BASE: BASE, TOPICS: TOPICS, SRSP: SRSP, SESSIONS: SESSIONS, WORKS: WORKS, REPO: REPO, CFG: CFG,
-    el: el, $: $, $$: $$, store: store, topic: topic, link: link, fetchJSON: fetchJSON, esc: esc, toast: toast, loadScript: loadScript,
+    el: el, rich: rich, $: $, $$: $$, store: store, topic: topic, link: link, fetchJSON: fetchJSON, esc: esc, toast: toast, loadScript: loadScript,
     header: header, footer: footer, trio: trio };
 })(window);

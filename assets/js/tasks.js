@@ -10,7 +10,7 @@
 
   function qa(list, open) {
     return el("div", { class: "qa" }, list.map(function (x, i) {
-      return el("details", { class: "qa-i", open: open ? true : null }, el("summary", null, el("span", { class: "qn" }, String(i + 1)), el("span", null, x.q)), el("div", { class: "qa-a" }, el("p", null, x.a)));
+      return el("details", { class: "qa-i", open: open ? true : null }, el("summary", null, el("span", { class: "qn" }, String(i + 1)), el("span", null, O.rich(x.q))), el("div", { class: "qa-a" }, el("p", null, O.rich(x.a))));
     }));
   }
   function render(D) {
@@ -23,7 +23,7 @@
         el("li", null, el("b", null, "Выполните индивидуальное задание своего варианта. "), "Номер варианта назначает преподаватель. Работайте в песочнице или в Visual Studio — код один и тот же."),
         el("li", null, el("b", null, "Сдайте работу через GitHub. "), "Кнопка ниже заполнит форму сдачи; останется приложить скриншот. ", el("a", { href: O.link("help/") }, "Подробнее о сдаче")),
         el("li", null, el("b", null, "Подготовьте ответы на контрольные вопросы "), "— преподаватель задаёт их при приёме работы."))));
-    if (P.goal) main.appendChild(el("p", { class: "lead" }, el("b", null, "Цель занятия. "), P.goal));
+    if (P.goal) main.appendChild(el("p", { class: "lead" }, el("b", null, "Цель занятия. "), O.rich(P.goal)));
 
     // варианты
     var myV = O.store.get("var" + n, "");
@@ -33,7 +33,7 @@
       list.innerHTML = "";
       P.variants.forEach(function (v) {
         var mine = String(v.n) === sel.value;
-        list.appendChild(el("li", { class: mine ? "mine" : null, id: "v" + v.n }, el("span", { class: "vn" }, String(v.n)), el("div", null, el("p", null, v.text),
+        list.appendChild(el("li", { class: mine ? "mine" : null, id: "v" + v.n }, el("span", { class: "vn" }, String(v.n)), el("div", null, el("p", null, O.rich(v.text)),
           mine ? el("div", { class: "v-act" },
             el("a", { class: "btn small", href: O.link("sandbox/?t=" + n + "&v=" + v.n) }, "Открыть в песочнице"),
             el("button", { class: "btn small run", type: "button", onclick: function () { submit(v.n); } }, "Сдать работу")) : null)));
@@ -45,9 +45,9 @@
       list));
     paint();
 
-    if (P.deliverables && P.deliverables.length) main.appendChild(el("section", { class: "blk" }, el("h2", null, "Что сдаётся"), el("ul", { class: "ticks" }, P.deliverables.map(function (d) { return el("li", null, d); })),
+    if (P.deliverables && P.deliverables.length) main.appendChild(el("section", { class: "blk" }, el("h2", null, "Что сдаётся"), el("ul", { class: "ticks" }, P.deliverables.map(function (d) { return el("li", null, O.rich(d)); })),
       el("button", { class: "btn run", type: "button", onclick: function () { submit(sel.value); } }, "Сдать работу")));
-    if (P.results && P.results.length) main.appendChild(el("section", { class: "blk" }, el("h2", null, "После занятия вы умеете"), el("ul", { class: "ticks" }, P.results.map(function (d) { return el("li", null, d); }))));
+    if (P.results && P.results.length) main.appendChild(el("section", { class: "blk" }, el("h2", null, "После занятия вы умеете"), el("ul", { class: "ticks" }, P.results.map(function (d) { return el("li", null, O.rich(d)); }))));
     main.appendChild(el("section", { class: "blk" }, el("h2", null, "Контрольные вопросы к практическому занятию"), el("p", { class: "muted small" }, "Сначала ответьте сами, затем раскройте ответ."), qa(P.questions)));
     if (L && L.selfcheck) main.appendChild(el("section", { class: "blk" }, el("h2", null, "Вопросы для самоконтроля к лекции " + n), qa(L.selfcheck)));
     O.footer();

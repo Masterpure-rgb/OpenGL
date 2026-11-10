@@ -49,6 +49,7 @@ var MAIN3D = function (title, extra) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(480, 360);
     glutCreateWindow("${title}");
+    glewInit();
 ${extra || ""}    glutDisplayFunc(display);
     glutIdleFunc(idle);
     glutMainLoop();
@@ -68,7 +69,8 @@ LAB.define({
     {
       id: "s0", kind: "example", title: "Пример: текстурированный квадрат",
       text: "<p>Программа создаёт текстуру размером 8×8 текселей из массива <code>GLubyte</code>, настраивает фильтрацию и накладывает её на квадрат. Обратите внимание на порядок действий: <code>glGenTextures</code> → <code>glBindTexture</code> → параметры → <code>glTexImage2D</code>; перед рисованием нужно включить <code>GL_TEXTURE_2D</code>, а каждой вершине задать текстурные координаты <code>glTexCoord2f</code> до вызова <code>glVertex</code>.</p><p>Измените координаты в углах квадрата на (0;0)…(3;3) и добавьте <code>GL_REPEAT</code>-режим (он включён по умолчанию): шахматка повторится 3×3 раза. Затем замените фильтр <code>GL_NEAREST</code> на <code>GL_LINEAR</code> и посмотрите, как изменятся границы клеток.</p>",
-      code: `#include <GL/glut.h>
+      code: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLuint tex;
 
@@ -96,6 +98,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
     glutInitWindowSize(400, 400);
     glutCreateWindow("Текстура на квадрате");
+    glewInit();
     makeChecker();
     glutDisplayFunc(display);
     glutMainLoop();
@@ -110,7 +113,8 @@ int main(int argc, char** argv) {
       text: "<p>Куб нарисован по таблицам вершин и граней, но все вершины имеют одинаковые (нулевые) текстурные координаты, поэтому каждая грань залита одним текселем.</p><ul><li>Для каждой из шести граней задайте координаты из массива <code>T[4][2]</code> перед соответствующей вершиной (<code>glTexCoord2f</code>).</li><li>Включите <code>GL_TEXTURE_2D</code> и свяжите текстуру <code>tex</code> (в заготовке она уже создана).</li></ul>",
       hint: "Внутри цикла по вершинам грани: glTexCoord2f(T[k][0], T[k][1]); glVertex3fv(V[F[i][k]]). Текстура должна быть включена до glBegin.",
       check: { type: "both", calls: { "glTexCoord2f": ">=24", "glEnable": ">=1" }, source: [{ re: "GL_TEXTURE_2D\\s*\\)\\s*;[\\s\\S]*glBegin", msg: "Включите GL_TEXTURE_2D до glBegin" }] },
-      starter: `#include <GL/glut.h>
+      starter: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLuint tex;
 ` + CUBE_DATA + `
@@ -148,7 +152,8 @@ void reshape(int w, int h) {
     glEnable(GL_DEPTH_TEST);
     glutReshapeFunc(reshape);
 `),
-      solution: `#include <GL/glut.h>
+      solution: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLuint tex;
 ` + CUBE_DATA + `
@@ -196,7 +201,10 @@ void reshape(int w, int h) {
       hint: "glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); для загрузки: glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data).",
       check: { type: "both", calls: { "glTexEnvi": ">=2" },
         source: [{ re: "glTexImage2D\\s*\\(", msg: "Передайте изображение в glTexImage2D" }, { re: "stbi_set_flip_vertically_on_load\\s*\\(\\s*1", msg: "Включите переворот строк: stbi_set_flip_vertically_on_load(1)" }, { re: "GL_REPLACE", msg: "Для правого куба нужен режим GL_REPLACE" }, { re: "GL_MODULATE", msg: "Для левого куба нужен режим GL_MODULATE" }] },
-      starter: `#include <GL/glut.h>
+      starter: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
+#define STB_IMAGE_IMPLEMENTATION     // stb_image.h: загрузка PNG/JPG
+#include "stb_image.h"
 
 GLuint tex;
 ` + CUBE_DATA + `
@@ -267,7 +275,10 @@ void reshape(int w, int h) {
     glEnable(GL_DEPTH_TEST);
     glutReshapeFunc(reshape);
 `),
-      solution: `#include <GL/glut.h>
+      solution: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
+#define STB_IMAGE_IMPLEMENTATION     // stb_image.h: загрузка PNG/JPG
+#include "stb_image.h"
 
 GLuint tex;
 ` + CUBE_DATA + `
@@ -349,7 +360,10 @@ void reshape(int w, int h) {
       hint: "Туман задаётся так: glFogi(GL_FOG_MODE, GL_LINEAR); glFogfv(GL_FOG_COLOR, цвет); glFogf(GL_FOG_START, …); glFogf(GL_FOG_END, …); glEnable(GL_FOG).",
       check: { type: "both", calls: { "glFogf": ">=2", "glFogfv": ">=1", "glFogi|glFogf": ">=3" },
         source: [{ re: "GL_REPEAT", msg: "Нужен режим повторения GL_REPEAT" }, { re: "glEnable\\s*\\(\\s*GL_FOG", msg: "Включите туман: glEnable(GL_FOG)" }] },
-      starter: `#include <GL/glut.h>
+      starter: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
+#define STB_IMAGE_IMPLEMENTATION     // stb_image.h: загрузка PNG/JPG
+#include "stb_image.h"
 
 GLuint tex;
 ` + LOAD_FN_DONE + `
@@ -389,7 +403,10 @@ void reshape(int w, int h) {
     glEnable(GL_DEPTH_TEST);
     glutReshapeFunc(reshape);
 `),
-      solution: `#include <GL/glut.h>
+      solution: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
+#define STB_IMAGE_IMPLEMENTATION     // stb_image.h: загрузка PNG/JPG
+#include "stb_image.h"
 
 GLuint tex;
 ` + LOAD_FN_DONE + `
@@ -440,7 +457,10 @@ void reshape(int w, int h) {
       text: "<p>Наклонная шахматная плоскость нарисована дважды: слева — текстура с фильтром <code>GL_NEAREST</code> без мип-уровней (видны муар и шум вдали), справа должна быть та же картинка с мип-уровнями. Сейчас правая половина белая: после <code>glTexImage2D</code> текстура <b>неполная</b> — фильтр по умолчанию <code>GL_NEAREST_MIPMAP_LINEAR</code> требует цепочки мип-уровней, а их нет.</p><ul><li>Для правой текстуры вместо <code>glTexImage2D</code> вызовите <code>gluBuild2DMipmaps</code>.</li><li>Задайте <code>GL_TEXTURE_MIN_FILTER</code> = <code>GL_LINEAR_MIPMAP_LINEAR</code>, <code>GL_TEXTURE_MAG_FILTER</code> = <code>GL_LINEAR</code>.</li></ul>",
       hint: "gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, w, h, GL_RGB, GL_UNSIGNED_BYTE, data) заменяет glTexImage2D и создаёт все уровни до 1×1.",
       check: { type: "both", calls: { "glBindTexture": ">=2" }, source: [{ re: "gluBuild2DMipmaps\\s*\\(", msg: "Постройте мип-уровни: gluBuild2DMipmaps" }, { re: "GL_LINEAR_MIPMAP_LINEAR", msg: "Используйте минифицирующий фильтр GL_LINEAR_MIPMAP_LINEAR" }] },
-      starter: `#include <GL/glut.h>
+      starter: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
+#define STB_IMAGE_IMPLEMENTATION     // stb_image.h: загрузка PNG/JPG
+#include "stb_image.h"
 
 GLuint texA, texB;
 
@@ -495,7 +515,10 @@ void reshape(int w, int h) {
     glEnable(GL_DEPTH_TEST);
     glutReshapeFunc(reshape);
 `),
-      solution: `#include <GL/glut.h>
+      solution: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
+#define STB_IMAGE_IMPLEMENTATION     // stb_image.h: загрузка PNG/JPG
+#include "stb_image.h"
 
 GLuint texA, texB;
 
@@ -559,7 +582,10 @@ void reshape(int w, int h) {
       text: "<p>Превратите белую сферу в глобус.</p><ul><li>Включите генерацию текстурных координат квадрики: <code>gluQuadricTexture(q, GL_TRUE)</code>.</li><li>Включите текстурирование и свяжите текстуру <code>earth.png</code> (функция <code>loadTexture</code> уже есть). Режим <code>GL_MODULATE</code> сохранит освещение.</li><li>Ось квадрики-сферы — это <i>z</i>; поверните сферу на −90° вокруг оси <i>x</i>, чтобы полюса были сверху и снизу, и добавьте вращение вокруг её оси на угол <code>a</code>.</li></ul>",
       hint: "Порядок: glRotatef(-90, 1, 0, 0); затем glRotatef(a, 0, 0, 1) — вращение вокруг оси сферы; gluSphere(q, 1.5, 48, 32).",
       check: { type: "both", calls: { "gluSphere": ">=1", "glBindTexture": ">=1" }, source: [{ re: "gluQuadricTexture\\s*\\(\\s*\\w+\\s*,\\s*GL_TRUE", msg: "Включите gluQuadricTexture(q, GL_TRUE)" }] },
-      starter: `#include <GL/glut.h>
+      starter: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
+#define STB_IMAGE_IMPLEMENTATION     // stb_image.h: загрузка PNG/JPG
+#include "stb_image.h"
 
 GLuint tex;
 ` + LOAD_FN_DONE + `
@@ -598,7 +624,10 @@ void reshape(int w, int h) {
     glEnable(GL_DEPTH_TEST);
     glutReshapeFunc(reshape);
 `),
-      solution: `#include <GL/glut.h>
+      solution: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
+#define STB_IMAGE_IMPLEMENTATION     // stb_image.h: загрузка PNG/JPG
+#include "stb_image.h"
 
 GLuint tex;
 ` + LOAD_FN_DONE + `
@@ -647,7 +676,8 @@ void reshape(int w, int h) {
       text: "<p>У тора и сферы нет текстурных координат — их вычислит OpenGL.</p><ul><li>Тор: включите <code>GL_TEXTURE_GEN_S</code> с режимом <code>GL_OBJECT_LINEAR</code> и плоскостью <code>GL_OBJECT_PLANE</code> = (1,0,0,0)·k (используйте k = 0,8): получатся полосы вдоль оси <i>x</i>.</li><li>Сфера: включите генерацию <i>s</i> и <i>t</i> в режиме <code>GL_SPHERE_MAP</code> — имитация отражения окружения («хром»); для сферы используйте текстуру неба <code>env</code> и режим <code>GL_REPLACE</code>.</li><li>После рисования каждого объекта выключайте генерацию.</li></ul>",
       hint: "Для тора: GLfloat plane[] = {0.8f, 0, 0, 0}; glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR); glTexGenfv(GL_S, GL_OBJECT_PLANE, plane); glEnable(GL_TEXTURE_GEN_S).",
       check: { type: "both", calls: { "glTexGeni": ">=3", "glTexGenfv": ">=1" }, source: [{ re: "GL_SPHERE_MAP", msg: "Для сферы нужен GL_SPHERE_MAP" }, { re: "GL_OBJECT_LINEAR", msg: "Для тора нужен GL_OBJECT_LINEAR" }, { re: "glDisable\\s*\\(\\s*GL_TEXTURE_GEN_S", msg: "Выключайте генерацию после объекта: glDisable(GL_TEXTURE_GEN_S)" }] },
-      starter: `#include <GL/glut.h>
+      starter: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLuint texStripe, texEnv;
 
@@ -731,7 +761,8 @@ void reshape(int w, int h) {
     glEnable(GL_DEPTH_TEST);
     glutReshapeFunc(reshape);
 `),
-      solution: `#include <GL/glut.h>
+      solution: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLuint texStripe, texEnv;
 
@@ -830,7 +861,10 @@ void reshape(int w, int h) {
       text: "<p>Перед кирпичной стеной стоят два стекла (RGBA-текстура <code>glass.png</code>): дальнее синеватое, ближнее красноватое. Сейчас они непрозрачны.</p><ul><li>Включите смешивание: <code>glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)</code>.</li><li>Непрозрачную стену рисуйте первой, прозрачные стёкла — после неё, <b>от дальнего к ближнему</b>.</li><li>На время вывода стёкол отключите запись в буфер глубины <code>glDepthMask(GL_FALSE)</code>, затем верните <code>GL_TRUE</code>.</li></ul>",
       hint: "Сначала стена, потом glEnable(GL_BLEND); glDepthMask(GL_FALSE); дальнее стекло (z = −1); ближнее стекло (z = +0.5); glDepthMask(GL_TRUE); glDisable(GL_BLEND).",
       check: { type: "both", calls: { "glBlendFunc": ">=1", "glDepthMask": ">=2" }, source: [{ re: "GL_ONE_MINUS_SRC_ALPHA", msg: "Коэффициенты: GL_SRC_ALPHA и GL_ONE_MINUS_SRC_ALPHA" }] },
-      starter: `#include <GL/glut.h>
+      starter: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
+#define STB_IMAGE_IMPLEMENTATION     // stb_image.h: загрузка PNG/JPG
+#include "stb_image.h"
 
 GLuint texWall, texGlass;
 
@@ -891,7 +925,10 @@ void reshape(int w, int h) {
     glEnable(GL_DEPTH_TEST);
     glutReshapeFunc(reshape);
 `),
-      solution: `#include <GL/glut.h>
+      solution: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
+#define STB_IMAGE_IMPLEMENTATION     // stb_image.h: загрузка PNG/JPG
+#include "stb_image.h"
 
 GLuint texWall, texGlass;
 
@@ -965,7 +1002,8 @@ void reshape(int w, int h) {
       text: "<p>Массив 5×5 пикселов (сердечко) нужно вывести на экран напрямую, минуя геометрию и текстуры.</p><ul><li>Строка массива из 5 пикселов RGB занимает 15 байт — не кратно 4. Установите <code>glPixelStorei(GL_UNPACK_ALIGNMENT, 1)</code>, иначе строки «поплывут».</li><li>Задайте растровую позицию (40, 60), увеличение <code>glPixelZoom(40, 40)</code> и выведите массив <code>glDrawPixels</code> (получится 200×200 пикселов).</li><li>Выведите тот же массив второй раз в позиции (250, 60), предварительно уменьшив зелёную компоненту: <code>glPixelTransferf(GL_GREEN_SCALE, 0.3f)</code>. Масштаб 40 сохраняется. После вывода верните GL_GREEN_SCALE = 1: преобразование действует на все последующие операции с пикселами.</li></ul>",
       hint: "Проекция gluOrtho2D(0, w, 0, h) делает единицу координат равной пикселу. glRasterPos2i(40, 60); glPixelZoom(40, 40); glDrawPixels(5, 5, GL_RGB, GL_UNSIGNED_BYTE, img).",
       check: { type: "both", calls: { "glDrawPixels": ">=2", "glRasterPos2i|glRasterPos2f": ">=2" }, source: [{ re: "GL_UNPACK_ALIGNMENT\\s*,\\s*1", msg: "Установите выравнивание строк: glPixelStorei(GL_UNPACK_ALIGNMENT, 1)" }, { re: "GL_GREEN_SCALE", msg: "Используйте glPixelTransferf(GL_GREEN_SCALE, ...)" }] },
-      starter: `#include <GL/glut.h>
+      starter: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLubyte heart[5][5][3];     // строки снизу вверх, как в OpenGL
 
@@ -1001,13 +1039,15 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Операции с пикселами");
+    glewInit();
     makeHeart();
     glutDisplayFunc(display);
     glutMainLoop();
     return 0;
 }
 `,
-      solution: `#include <GL/glut.h>
+      solution: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLubyte heart[5][5][3];     // строки снизу вверх, как в OpenGL
 
@@ -1048,6 +1088,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Операции с пикселами");
+    glewInit();
     makeHeart();
     glutDisplayFunc(display);
     glutMainLoop();

@@ -21,8 +21,11 @@
     var cur = Math.min(O.store.get(key + ":cur", 0), steps.length - 1);
 
     var list = el("ol", { class: "steps" });
-    var prog = el("p", { class: "prog" });
-    var stepsBox = el("nav", { class: "lab-steps", "aria-label": "Шаги лабораторной" }, el("h2", null, "Шаги"), prog, list);
+    var dots = el("ol", { class: "stepper", style: "--n: " + steps.length });
+    var prog = el("span", { class: "prog" });
+    var all = el("details", { class: "all-steps" }, el("summary", null, "Список шагов"), list);
+    var stepsBox = el("nav", { class: "lab-steps", "aria-label": "Шаги лабораторной" },
+      el("div", { class: "sh" }, el("h2", null, "Шаги"), prog), dots, all);
     var taskBox = el("section", { class: "task", "aria-live": "polite" });
     var ideHost = el("div");
     var tabs = el("div", { class: "tabs", role: "tablist" });
@@ -43,18 +46,26 @@
     function setTab(t) { wrap.setAttribute("data-tab", t); O.$$("button", tabs).forEach(function (b) { b.setAttribute("aria-selected", b.getAttribute("data-tab") === t ? "true" : "false"); }); }
     setTab("task");
 
+    function title(s) { return cap(s.title.replace(/^(Пример|Задание)\s*\d*[:.]\s*/i, "")); }
     function renderList() {
-      list.innerHTML = "";
+      list.innerHTML = ""; dots.innerHTML = "";
+      steps.forEach(function (s, i) {
+        var lbl = s.kind === "example" ? "П" : String(stepNo(i));
+        dots.appendChild(el("li", { class: (i === cur ? "cur " : "") + (done.has(s.id) ? "done" : "") },
+          el("button", { type: "button", title: (s.kind === "example" ? "Пример: " : "Задание " + lbl + ": ") + title(s),
+            "aria-label": (s.kind === "example" ? "Пример: " : "Задание " + lbl + ": ") + title(s) + (done.has(s.id) ? " (выполнено)" : ""),
+            "aria-current": i === cur ? "step" : null, onclick: function () { go(i); } }, lbl)));
+      });
       steps.forEach(function (s, i) {
         var isDone = done.has(s.id);
         list.appendChild(el("li", { class: (i === cur ? "cur " : "") + (isDone ? "done" : "") },
-          el("button", { type: "button", onclick: function () { go(i); }, "aria-current": i === cur ? "step" : null },
+          el("button", { type: "button", onclick: function () { all.open = false; go(i); }, "aria-current": i === cur ? "step" : null },
             el("span", { class: "sn" }, s.kind === "example" ? "П" : String(stepNo(i))),
-            el("span", { class: "st" }, cap(s.title.replace(/^(Пример|Задание)\s*\d*[:.]\s*/i, ""))),
+            el("span", { class: "st" }, title(s)),
             isDone ? el("span", { class: "ok", "aria-label": "выполнено" }, "✓") : null)));
       });
       var tasks = steps.filter(function (s) { return s.kind === "task"; }), d = tasks.filter(function (s) { return done.has(s.id); }).length;
-      prog.textContent = "Выполнено заданий: " + d + " из " + tasks.length;
+      prog.textContent = "выполнено " + d + " из " + tasks.length;
     }
     function stepNo(i) { var k = 0; for (var j = 0; j <= i; j++) if (steps[j].kind === "task") k++; return k; }
     var result = null;
@@ -65,7 +76,7 @@
       taskBox.innerHTML = "";
       var head = el("div", { class: "task-h" },
         el("span", { class: "tag " + s.kind }, s.kind === "example" ? "Пример" : "Задание " + stepNo(i)),
-        el("h2", null, cap(s.title.replace(/^(Пример|Задание)\s*\d*[:.]\s*/i, ""))));
+        el("h2", null, title(s)));
       taskBox.appendChild(head);
       taskBox.appendChild(el("div", { class: "task-text", html: s.text || "" }));
       if (s.kind === "task") {

@@ -96,7 +96,7 @@
     GLUT_WINDOW_X: 100, GLUT_WINDOW_Y: 101, GLUT_WINDOW_WIDTH: 102, GLUT_WINDOW_HEIGHT: 103, GLUT_SCREEN_WIDTH: 200,
     GLUT_SCREEN_HEIGHT: 201, GLUT_ELAPSED_TIME: 700, GLUT_WINDOW_DOUBLEBUFFER: 115, GLUT_ACTION_ON_WINDOW_CLOSE: 0x01F9,
     GLUT_ACTION_EXIT: 0, GLUT_ACTION_GLUTMAINLOOP_RETURNS: 1, GLUT_ACTION_CONTINUE_EXECUTION: 2,
-    GLUT_CORE_PROFILE: 1, GLUT_COMPATIBILITY_PROFILE: 2, GLUT_VISIBLE: 1, GLUT_NOT_VISIBLE: 0,
+    GLUT_CORE_PROFILE: 1, GLUT_COMPATIBILITY_PROFILE: 2, GLUT_VISIBLE: 1, GLUT_NOT_VISIBLE: 0, GLEW_OK: 0,
     GLUT_BITMAP_9_BY_15: "9x15", GLUT_BITMAP_8_BY_13: "8x13", GLUT_BITMAP_TIMES_ROMAN_10: "tr10",
     GLUT_BITMAP_TIMES_ROMAN_24: "tr24", GLUT_BITMAP_HELVETICA_10: "h10", GLUT_BITMAP_HELVETICA_12: "h12",
     GLUT_BITMAP_HELVETICA_18: "h18", GLUT_STROKE_ROMAN: "h18", GLUT_STROKE_MONO_ROMAN: "9x15"
@@ -1500,6 +1500,8 @@
     def("glutInitWindowPosition", function () {}, false);
     def("glutInitContextVersion", function () {}, false); def("glutInitContextProfile", function () {}, false);
     def("glutSetOption", function () {}, false);
+    // GLEW: в Windows нужен для функций OpenGL 1.2+; в браузере всё доступно сразу — glewInit() ничего не делает
+    def("glewInit", function () { return 0; }, false);
     def("glutCreateWindow", function (t) {
       if (created) { warn("Песочница поддерживает одно окно: повторный glutCreateWindow() игнорируется."); return 1; }
       title = String(t || "OpenGL"); doubleBuf = !!(displayMode & K.GLUT_DOUBLE); hasDepth = !!(displayMode & K.GLUT_DEPTH);

@@ -6,7 +6,8 @@ LAB.define({
     {
       id: "s0", kind: "example", title: "Пример: сцена для опытов с тенями и отражениями",
       text: "<p>Это базовая сцена, на которой строятся задания 4–8: шахматный пол, оранжевый бублик в воздухе и синий шар на полу, освещённые точечным источником. Обратите внимание на <code>glutInitDisplayMode</code>: помимо <code>GLUT_DEPTH</code> запрошен <code>GLUT_STENCIL</code> — без него буфера трафарета нет, и все операции с ним молча ничего не делают. Количество бит трафарета программа печатает функцией <code>glGetIntegerv(GL_STENCIL_BITS, …)</code>; в консоли справа должно быть 8.</p><p>Источник света задаётся один раз в <code>display</code>, <i>после</i> <code>gluLookAt</code>: положение источника преобразуется текущей модельно-видовой матрицей, поэтому он «привязан» к миру, а не к камере.</p>",
-      code: `#include <GL/glut.h>
+      code: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLfloat lightPos[] = { 2.5f, 4.0f, 2.0f, 1.0f };   // точечный источник света над сценой
 
@@ -86,6 +87,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STENCIL);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Сцена для экспериментов");
+    glewInit();
     init();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
@@ -99,7 +101,8 @@ int main(int argc, char** argv) {
       text: "<p>Каркасная сцена выводится в двух половинах окна функцией <code>drawHalf</code>. Левая половина рисуется как есть — на наклонных линиях видны «ступеньки». Заставьте правую половину (параметр <code>smooth</code>) рисоваться со сглаживанием:</p><ul><li>включите <code>GL_LINE_SMOOTH</code> и подсказку <code>GL_LINE_SMOOTH_HINT</code> со значением <code>GL_NICEST</code>;</li><li>включите смешивание <code>GL_BLEND</code> с функцией <code>GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA</code> — именно через альфа-компоненту передаётся доля покрытия пикселя линией.</li></ul>",
       hint: "Сглаживание линий без смешивания не даёт эффекта: фрагмент получает альфа, равную доле покрытия пикселя, но использовать её будет только блок смешивания.",
       check: {"type": "both", "calls": {"glHint": ">=1", "glBlendFunc": ">=1"}, "source": [{"re": "glEnable\\s*\\(\\s*GL_LINE_SMOOTH", "msg": "Включите GL_LINE_SMOOTH"}]},
-      starter: `#include <GL/glut.h>
+      starter: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 // Каркасные фигуры: икосаэдр и сфера
 void drawWire() {
@@ -152,13 +155,15 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Сглаживание линий");
+    glewInit();
     glClearColor(0.05f, 0.06f, 0.10f, 1.0f);
     glutDisplayFunc(display);
     glutMainLoop();
     return 0;
 }
 `,
-      solution: `#include <GL/glut.h>
+      solution: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 // Каркасные фигуры: икосаэдр и сфера
 void drawWire() {
@@ -218,6 +223,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Сглаживание линий");
+    glewInit();
     glClearColor(0.05f, 0.06f, 0.10f, 1.0f);
     glutDisplayFunc(display);
     glutMainLoop();
@@ -230,7 +236,8 @@ int main(int argc, char** argv) {
       text: "<p>Сцена из примера выводится без сглаживания: границы бублика, шара и плиток — «лесенкой». Включите мультисэмплинг, который выполняется самим растеризатором и не требует ни смешивания, ни сортировки объектов:</p><ul><li>добавьте флаг <code>GLUT_MULTISAMPLE</code> в <code>glutInitDisplayMode</code> — буфер выборок создаётся вместе с окном, включить его позже нельзя;</li><li>включите <code>glEnable(GL_MULTISAMPLE)</code> в <code>init</code>.</li></ul><p>В консоли программа печатает число буферов выборок и выборок на пиксель (<code>GL_SAMPLE_BUFFERS</code>, <code>GL_SAMPLES</code>): без флага там 0, с флагом — ненулевые значения.</p>",
       hint: "Флаги режима складываются оператором «|». Если окно создано без GLUT_MULTISAMPLE, вызов glEnable(GL_MULTISAMPLE) ничего не меняет — выборок просто нет.",
       check: {"type": "both", "source": [{"re": "GLUT_MULTISAMPLE\\s*[|)]|\\|\\s*GLUT_MULTISAMPLE", "msg": "Добавьте GLUT_MULTISAMPLE в glutInitDisplayMode"}, {"re": "glEnable\\s*\\(\\s*GL_MULTISAMPLE", "msg": "Включите GL_MULTISAMPLE"}]},
-      starter: `#include <GL/glut.h>
+      starter: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLfloat lightPos[] = { 2.5f, 4.0f, 2.0f, 1.0f };   // точечный источник света над сценой
 
@@ -312,6 +319,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH      /* TODO: добавьте GLUT_MULTISAMPLE */);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Мультисэмплинг");
+    glewInit();
     init();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
@@ -319,7 +327,8 @@ int main(int argc, char** argv) {
     return 0;
 }
 `,
-      solution: `#include <GL/glut.h>
+      solution: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLfloat lightPos[] = { 2.5f, 4.0f, 2.0f, 1.0f };   // точечный источник света над сценой
 
@@ -401,6 +410,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_MULTISAMPLE);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Мультисэмплинг");
+    glewInit();
     init();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
@@ -414,7 +424,8 @@ int main(int argc, char** argv) {
       text: "<p>Окно создано с флагом <code>GLUT_ACCUM</code>, функция <code>renderPass(dx, dy)</code> рисует сцену, сдвинув проекцию на доли пикселя, а в массиве <code>jit</code> записаны 8 смещений. Заготовка выводит один несдвинутый кадр. Реализуйте усреднение восьми кадров:</p><ul><li>очистите накопительный буфер (<code>GL_ACCUM_BUFFER_BIT</code>);</li><li>в цикле по <i>i</i> = 0…7 нарисуйте проход со сдвигом <code>jit[i]</code> и добавьте его в накопительный буфер с весом 1/8 (<code>GL_ACCUM</code>);</li><li>верните сумму в буфер цвета (<code>GL_RETURN</code>, множитель 1).</li></ul>",
       hint: "Сумма весов должна равняться единице: восемь кадров с весом 1/8 дают исходную яркость, иначе картинка станет темнее или пересветится.",
       check: {"type": "both", "calls": {"glAccum": ">=9"}},
-      starter: `#include <GL/glut.h>
+      starter: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLfloat lightPos[] = { 2.5f, 4.0f, 2.0f, 1.0f };   // точечный источник света над сценой
 
@@ -505,13 +516,15 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_ACCUM);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Накопительный буфер");
+    glewInit();
     init();
     glutDisplayFunc(display);
     glutMainLoop();
     return 0;
 }
 `,
-      solution: `#include <GL/glut.h>
+      solution: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLfloat lightPos[] = { 2.5f, 4.0f, 2.0f, 1.0f };   // точечный источник света над сценой
 
@@ -605,6 +618,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_ACCUM);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Накопительный буфер");
+    glewInit();
     init();
     glutDisplayFunc(display);
     glutMainLoop();
@@ -617,7 +631,8 @@ int main(int argc, char** argv) {
       text: "<p>Постройте тень от бублика и шара. Тень — это сами объекты, спроецированные из точки света на плоскость пола. Напишите функцию <code>shadowMatrix</code>, вычисляющую матрицу <b>M</b> = (<b>n</b>·<b>L</b>)·<b>E</b> − <b>L</b>·<b>n</b><sup>T</sup> (<i>n</i> — четвёрка коэффициентов плоскости, <i>L</i> — положение света), и выведите ею тень:</p><ul><li>выключите освещение и нарисуйте тёмным цветом <code>drawObjects(1)</code> после <code>glMultMatrixf(m)</code>;</li><li>чтобы тень не «мерцала» (z-fighting) на полу, включите <code>GL_POLYGON_OFFSET_FILL</code> и вызовите <code>glPolygonOffset(-1, -1)</code>.</li></ul><p>Обратите внимание на край пола: тень бублика выходит за его границу — это будет исправлено в задании 5.</p>",
       hint: "Матрица в OpenGL хранится по столбцам: элемент строки row и столбца col лежит в m[col*4 + row]. На диагонали добавляется dot, из каждого элемента вычитается l[row]*plane[col].",
       check: {"type": "both", "calls": {"glMultMatrixf": ">=1", "glPolygonOffset": ">=1"}},
-      starter: `#include <GL/glut.h>
+      starter: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLfloat lightPos[] = { 2.5f, 4.0f, 2.0f, 1.0f };   // точечный источник света над сценой
 
@@ -707,6 +722,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STENCIL);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Проекционная тень");
+    glewInit();
     init();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
@@ -714,7 +730,8 @@ int main(int argc, char** argv) {
     return 0;
 }
 `,
-      solution: `#include <GL/glut.h>
+      solution: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLfloat lightPos[] = { 2.5f, 4.0f, 2.0f, 1.0f };   // точечный источник света над сценой
 
@@ -814,6 +831,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STENCIL);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Проекционная тень");
+    glewInit();
     init();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
@@ -827,7 +845,8 @@ int main(int argc, char** argv) {
       text: "<p>Сделайте тень полупрозрачной, чтобы сквозь неё просвечивал рисунок плиток. Наивное смешивание даёт две ошибки: там, где проекции нескольких частей объекта накладываются, тень темнеет многократно («двойное смешивание»), а часть тени оказывается за краем пола. Оба дефекта устраняет буфер трафарета:</p><ul><li>при рисовании пола записывайте в трафарет единицу (<code>glStencilFunc(GL_ALWAYS, 1, 0xFF)</code>, <code>glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE)</code>);</li><li>тень выводите с <code>glStencilFunc(GL_EQUAL, 1, 0xFF)</code> и <code>glStencilOp(GL_KEEP, GL_KEEP, GL_INCR)</code> — пиксель, в который тень уже записана, получает значение 2 и повторно не закрашивается; за пределами пола трафарет равен 0, и тень там не рисуется.</li></ul>",
       hint: "Третий аргумент glStencilOp срабатывает, когда пройдены и тест трафарета, и тест глубины; именно его нужно сделать GL_INCR. Не забудьте после тени выключить GL_STENCIL_TEST.",
       check: {"type": "both", "calls": {"glStencilFunc": ">=2", "glStencilOp": ">=2"}},
-      starter: `#include <GL/glut.h>
+      starter: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLfloat lightPos[] = { 2.5f, 4.0f, 2.0f, 1.0f };   // точечный источник света над сценой
 
@@ -934,6 +953,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STENCIL);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Тень с трафаретом");
+    glewInit();
     init();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
@@ -941,7 +961,8 @@ int main(int argc, char** argv) {
     return 0;
 }
 `,
-      solution: `#include <GL/glut.h>
+      solution: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLfloat lightPos[] = { 2.5f, 4.0f, 2.0f, 1.0f };   // точечный источник света над сценой
 
@@ -1053,6 +1074,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STENCIL);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Тень с трафаретом");
+    glewInit();
     init();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
@@ -1066,7 +1088,8 @@ int main(int argc, char** argv) {
       text: "<p>Постройте «чёрное зеркало» на месте пола. Алгоритм из трёх шагов:</p><ul><li>нарисуйте пол <i>только в буфер трафарета</i> (единица на пикселях пола; <code>glColorMask</code> и <code>glDepthMask</code> выключены);</li><li>при <code>glStencilFunc(GL_EQUAL, 1, 0xFF)</code> нарисуйте сцену, отражённую матрицей <code>glScalef(1, -1, 1)</code>. Внутри отражения заново задайте <code>GL_POSITION</code> источника и установите <code>glFrontFace(GL_CW)</code> — иначе при включённом отсечении граней (оно включено в <code>init</code>) отразятся «изнанки» фигур;</li><li>выключите трафарет и нарисуйте настоящие объекты.</li></ul><p>Отражение видно только внутри границ пола — остальное окно трафарет не пропускает.</p>",
       hint: "Источник света, заданный до glScalef, остаётся «под полом» неотражённым; положение GL_POSITION нужно задать повторно уже при действующем отражении, а после glPopMatrix — ещё раз, чтобы реальные объекты освещались как раньше.",
       check: {"type": "both", "calls": {"glScalef": ">=1", "glFrontFace": ">=2", "glStencilFunc": ">=2"}},
-      starter: `#include <GL/glut.h>
+      starter: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLfloat lightPos[] = { 2.5f, 4.0f, 2.0f, 1.0f };   // точечный источник света над сценой
 
@@ -1147,6 +1170,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STENCIL);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Зеркальный пол");
+    glewInit();
     init();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
@@ -1154,7 +1178,8 @@ int main(int argc, char** argv) {
     return 0;
 }
 `,
-      solution: `#include <GL/glut.h>
+      solution: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLfloat lightPos[] = { 2.5f, 4.0f, 2.0f, 1.0f };   // точечный источник света над сценой
 
@@ -1256,6 +1281,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STENCIL);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Зеркальный пол");
+    glewInit();
     init();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
@@ -1269,7 +1295,8 @@ int main(int argc, char** argv) {
       text: "<p>Настоящий пол не должен исчезать — зеркало должно быть «глянцевым». После вывода отражения (и выключения трафарета) включите смешивание <code>GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA</code> и нарисуйте пол полупрозрачным: <code>drawFloor(0.45f)</code>. Значение 0.45 — это альфа плиток; чем оно меньше, тем отчётливее отражение.</p><p>Порядок вывода важен: полупрозрачный пол рисуется <i>после</i> отражения, но <i>до</i> настоящих объектов, иначе непрозрачные объекты окажутся под ним в буфере глубины.</p>",
       hint: "Цвет плитки задаётся через glColor4f, а при включённом GL_COLOR_MATERIAL альфа цвета становится альфой диффузного материала — поэтому освещённый пол остаётся прозрачным на 55 %.",
       check: {"type": "both", "calls": {"glBlendFunc": ">=1", "glEnable": ">=1"}, "source": [{"re": "drawFloor\\s*\\(\\s*0\\.\\d+f?\\s*\\)", "msg": "Нарисуйте пол с альфой меньше единицы: drawFloor(0.45f)"}]},
-      starter: `#include <GL/glut.h>
+      starter: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLfloat lightPos[] = { 2.5f, 4.0f, 2.0f, 1.0f };   // точечный источник света над сценой
 
@@ -1373,6 +1400,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STENCIL);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Полупрозрачное зеркало");
+    glewInit();
     init();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
@@ -1380,7 +1408,8 @@ int main(int argc, char** argv) {
     return 0;
 }
 `,
-      solution: `#include <GL/glut.h>
+      solution: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLfloat lightPos[] = { 2.5f, 4.0f, 2.0f, 1.0f };   // точечный источник света над сценой
 
@@ -1488,6 +1517,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STENCIL);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Полупрозрачное зеркало");
+    glewInit();
     init();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
@@ -1501,7 +1531,8 @@ int main(int argc, char** argv) {
       text: "<p>В сцену добавлен красный столбик, вбитый в пол: его нижняя часть находится <i>под</i> полом. Запустите заготовку: над настоящей верхушкой столбика «вырос» длинный призрак — это отражение подпольной части, которое после <code>glScalef(1, -1, 1)</code> оказывается над полом.</p><p>Уберите его плоскостью отсечения: перед отражением вызовите <code>glClipPlane(GL_CLIP_PLANE0, clip)</code> с уравнением <code>{0, -1, 0, 0}</code> (массив <code>GLdouble[4]</code>) и включите <code>GL_CLIP_PLANE0</code>; после отражения выключите её. Уравнение преобразуется модельно-видовой матрицей, действующей в момент вызова <code>glClipPlane</code>, поэтому вызывать функцию нужно <i>до</i> <code>glScalef</code>.</p>",
       hint: "Плоскость a·x + b·y + c·z + d ≥ 0 оставляет точки с неотрицательным значением. После отражения нужные точки имеют y ≤ 0, то есть −y ≥ 0 — отсюда коэффициент −1.",
       check: {"type": "both", "calls": {"glClipPlane": ">=1"}, "source": [{"re": "glEnable\\s*\\(\\s*GL_CLIP_PLANE0", "msg": "Включите GL_CLIP_PLANE0"}]},
-      starter: `#include <GL/glut.h>
+      starter: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLfloat lightPos[] = { 2.5f, 4.0f, 2.0f, 1.0f };   // точечный источник света над сценой
 
@@ -1622,6 +1653,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STENCIL);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Плоскость отсечения");
+    glewInit();
     init();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
@@ -1629,7 +1661,8 @@ int main(int argc, char** argv) {
     return 0;
 }
 `,
-      solution: `#include <GL/glut.h>
+      solution: `#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 
 GLfloat lightPos[] = { 2.5f, 4.0f, 2.0f, 1.0f };   // точечный источник света над сценой
 
@@ -1755,6 +1788,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STENCIL);
     glutInitWindowSize(480, 360);
     glutCreateWindow("Плоскость отсечения");
+    glewInit();
     init();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);

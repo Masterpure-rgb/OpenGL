@@ -1,6 +1,8 @@
 /* Лабораторная 12: Преобразования объектов, материалы и освещение в OpenGL */
 (function () {
-  const HEAD = `#include <GL/glut.h>
+  const HEAD = `#define _USE_MATH_DEFINES   // M_PI в Visual Studio
+#include <GL/glew.h>   // GLEW: функции OpenGL 1.2+ в Windows
+#include <GL/glut.h>
 #include <cmath>
 
 `;
@@ -25,6 +27,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(480, 360);
     glutCreateWindow("${title}");
+    glewInit();
     init();
     glutDisplayFunc(display);
 ${reshape ? "    glutReshapeFunc(reshape);\n" : ""}${idle ? "    glutIdleFunc(idle);\n" : ""}    glutMainLoop();
